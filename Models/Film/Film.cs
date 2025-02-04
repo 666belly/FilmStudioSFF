@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace FilmStudioSFF.Models
 {
     public class Film
