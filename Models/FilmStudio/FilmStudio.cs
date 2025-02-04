@@ -8,7 +8,7 @@ namespace FilmStudioSFF.Models
         public required string Name { get; set; }
         public required string City { get; set; }
         public required string Username { get; set; }
-        public required List<FilmCopy> RentedFilmCopies { get; set; }
+        public required List<FilmCopy> RentedFilms { get; set; }
     }
 
 }
