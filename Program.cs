@@ -1,8 +1,17 @@
+using FilmStudioSFF.Services;
+using FilmStudioSFF.Interfaces;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http.HttpResults;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<FilmStudioSFF.Services.AuthenticationService>();
 
 var app = builder.Build();
 

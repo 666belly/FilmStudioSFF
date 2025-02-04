@@ -7,7 +7,7 @@ namespace FilmStudioSFF.Controllers
 {
     [Route ("api/[controller]")]
     [ApiController] 
-    public class FilmController : Controller
+    public class FilmController : ControllerBase
     {
         private readonly FilmService _filmService;
 
