@@ -1,12 +1,11 @@
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
 using FilmStudioSFF.Models;
-//using FilmStudioSFF.Services;
+using FilmStudioSFF.Services;
+using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 
 namespace FilmStudioSFF.Controllers
 {
-   [Route ("api/[controller]")]
+    [Route ("api/[controller]")]
     [ApiController] 
     public class FilmController : Controller
     {
@@ -27,7 +26,7 @@ namespace FilmStudioSFF.Controllers
                 return NotFound();
             }
 
-            return Ok(films); //returnstatus 200ok
+            return Ok(filmService); //returnstatus 200ok
         }
 
         //GET: api/film/id
@@ -47,19 +46,13 @@ namespace FilmStudioSFF.Controllers
         [HttpPost]
         public ActionResult<Film> AddFilm([FromBody] Film newFilm)
         {
-            if (updatedFilm == null || updatedFilm.Id != id)
+            if (newFilm == null)
             {
                 return BadRequest(); //returnstatus 400badrequest
             }
 
-            var film = _filmService.GetFilmById(id);
-            if (film == null)
-            {
-                return NotFound(); //returnstatus 404notfound
-            }
-
-            _filmService.UpdateFilm(updatedFilm);
-            return NoContent(); //returnstatus 204nocontent
+            _filmService.AddFilm(newFilm);
+            return CreatedAtAction(nameof(GetFilmById), new { id = newFilm.FilmId }, newFilm); //returnstatus 201created
         }
         
         //DELETE: api/film/id
