@@ -7,6 +7,6 @@ namespace FilmStudioSFF.Models
         public int UserId { get; set; }
         public string Username { get; set; }
         public string PasswordHash { get; set; }
-        public string Role { get; set; } //admin or filmstudio
+        public bool IsAdmin { get; set; } //admin or filmstudio
     }
 }

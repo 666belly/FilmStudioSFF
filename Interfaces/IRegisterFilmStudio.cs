@@ -5,5 +5,5 @@ public interface IRegisterFilmStudio
 {
     string Name { get; set; }
     string City { get; set; }
-    string Email { get; set; }
+    string Username { get; set; }
 }

@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using FilmStudioSFF.Models;
+using System.Threading.Tasks;
+using FilmStudioSFF.Models; 
 
 namespace FilmStudioSFF.Interfaces
 {
-    public interface IUserRegister
+    public interface IUserAuthenticate
     {
         string Username { get; set; }
         string Password { get; set; }
-        bool IsAdmin { get; set; }
     }
 }
