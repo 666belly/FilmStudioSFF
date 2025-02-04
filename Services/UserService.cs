@@ -12,7 +12,7 @@ namespace FilmStudioSFF.Services
     {
         private readonly List<User> _users = new List<User>();
 
-        public User RegisterUser(IUserRegister userRegister)
+        public User? RegisterUser(IUserRegister userRegister)
         {
             if (_users.Any(u => u.Username == userRegister.Username))
             {
@@ -29,17 +29,19 @@ namespace FilmStudioSFF.Services
             };
 
             _users.Add(user);
-            return newUser;
+            return user;
         }
 
         //Authonticate user
-        public User AuthenticateUser(IUserAuthenticate loginRequest)
+        public User? AuthenticateUser(IUserAuthenticate loginRequest)
         {
             var user = _users.FirstOrDefault(u => u.Username == loginRequest.Username);
             if (user == null || !VerifyPassword(loginRequest.Password, user.Password))
             {
                 return null;
             }
+            
+            return user; 
         }
 
         //Get user by id
@@ -48,6 +50,11 @@ namespace FilmStudioSFF.Services
 
             return _users.FirstOrDefault(u => u.UserId == id)!;
 
+        }
+
+        public List<User> GetAllUsers()
+        {
+            return _users;
         }
 
         //Hash password

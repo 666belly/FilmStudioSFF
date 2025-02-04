@@ -3,20 +3,20 @@ using FilmStudioSFF.Models;
 using FilmStudioSFF.Services;
 using FilmStudioSFF.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http.HttpResults;
+using System.IdentityModel.Tokens.Jwt;
+using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
+
 
 namespace FilmStudioSFF.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : Controller
+    public class UserController : ControllerBase
     {
         private readonly UserService _userService;
-        private readonly AuthenticationService _authService;
+        private readonly FilmStudioSFF.Services.AuthenticationService _authService;
 
-        public UserController(UserService userService, AuthenticationService authService)
+        public UserController(UserService userService, FilmStudioSFF.Services.AuthenticationService authService)
         {
             _userService = userService;
             _authService = authService;
@@ -37,7 +37,7 @@ namespace FilmStudioSFF.Controllers
                 return Conflict ("User already exists."); // 409 Conflict
             }
 
-            return CreatedAtAction(nameof(GetUserById), new { id = user.UserId }, user); // 201 Created
+            return CreatedAtAction(nameof(GetUser), new { id = user.UserId }, user); // 201 Created
         }
 
         //POST api/user/login
@@ -59,7 +59,11 @@ namespace FilmStudioSFF.Controllers
         [Authorize]
         public ActionResult<User> GetUser(int id)
         {
-            var requestingUserId = int.Parse(User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value);
+            var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            if (!int.TryParse(userIdClaim, out var requestingUserId))
+            {
+                return Unauthorized("Invalid user ID."); // 401 Unauthorized
+            }
             var requestingUserRole = User.FindFirst("role")?.Value; 
 
             if (requestingUserRole != "admin" && requestingUserId != id)
@@ -81,6 +85,7 @@ namespace FilmStudioSFF.Controllers
         [Authorize (Roles = "admin")]
         public ActionResult<IEnumerable<User>> GetAllUsers()
         {
+            var users = _userService.GetAllUsers();
             return Ok(users); // 200 OK
         } 
     }
