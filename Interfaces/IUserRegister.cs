@@ -8,6 +8,5 @@ namespace FilmStudioSFF.Interfaces
         string Username { get; set; }
         string Password { get; set; }
         string Role { get; set; }
-        bool IsAdmin { get; set; }
     }
 }

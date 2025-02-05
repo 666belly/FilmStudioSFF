@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using FilmStudioSFF.Models;
 
-public interface IFilm
+public interface ICreateFilm
 {
     int FilmId { get; set; }
     string Title { get; set; }
