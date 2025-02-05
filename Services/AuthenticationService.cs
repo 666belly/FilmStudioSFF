@@ -1,4 +1,5 @@
 using FilmStudioSFF.Models;
+using System;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
@@ -8,18 +9,18 @@ namespace FilmStudioSFF.Services
 {
     public class AuthenticationService 
     {
-        private const string SecretKey = "YourSuperSecretKey123!";
-
-        public string GenerateJwtToken(User user)
+        private const string SecretKey = "YourSuperSecretKey1234567890abcdef";    
+        
+        public string GenerateJwtToken(UserRegister userRegister)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256); 
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
-                new Claim("role", user.Role)
+                new Claim(JwtRegisteredClaimNames.Sub, userRegister.UserId.ToString()),   
+                new Claim(JwtRegisteredClaimNames.UniqueName, userRegister.Username),    
+                new Claim("role", userRegister.Role)                                     
             };
 
             var token = new JwtSecurityToken(

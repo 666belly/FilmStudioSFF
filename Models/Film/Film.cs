@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace FilmStudioSFF.Models
 {
-    public class Film : IFilm
+    public class Film : ICreateFilm
     {
         public int FilmId { get; set; }
         public required string Title { get; set; }

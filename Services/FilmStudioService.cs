@@ -1,74 +1,90 @@
-using FilmStudioSFF.Interfaces;
 using FilmStudioSFF.Models;
+using FilmStudioSFF.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace FilmStudioSFF.Services
 {
     public class FilmStudioService
     {
-        private readonly List<FilmStudio> _filmStudios = new List<FilmStudio>();
+        private readonly FilmStudioDbContext _context;
 
-        //Register new filmstudio
-        public FilmStudio RegisterFilmStudio(IRegisterFilmStudio registerFilmStudio)
+        public FilmStudioService(FilmStudioDbContext context)
         {
-            if (_filmStudios.Any(fs => fs.Name == registerFilmStudio.Name))
+            _context = context;
+        }
+
+        // Registrera en ny filmstudio
+        public FilmStudio? RegisterFilmStudio(IRegisterFilmStudio registerFilmStudio)
+        {
+            if (_context.FilmStudios.Any(fs => fs.Name == registerFilmStudio.Name))
             {
-                throw new InvalidOperationException("A film studio with the same name already exists.");
+                throw new InvalidOperationException("En filmstudio med samma namn finns redan.");
             }
 
             var newStudio = new FilmStudio
             {
-                FilmStudioId = _filmStudios.Count + 1,
                 Name = registerFilmStudio.Name,
                 City = registerFilmStudio.City,
                 Username = registerFilmStudio.Username,
                 Email = registerFilmStudio.Email,
                 RentedFilms = new List<FilmCopy>()
             };
-            
-            _filmStudios.Add(newStudio);
+
+            _context.FilmStudios.Add(newStudio);
+            _context.SaveChanges();
             return newStudio;
         }
 
-        //Get speicifc filmstudio based on id
-        public FilmStudio GetFilmStudioById(int id)
+        // Hämta en specifik filmstudio baserat på ID
+        public FilmStudio? GetFilmStudioById(int id)
         {
-            Console.WriteLine($"Film studios count: {_filmStudios.Count}");  // Debugging
-            var studio = _filmStudios.FirstOrDefault(fs => fs.FilmStudioId == id);
-            if (studio == null)
-            {
-                throw new KeyNotFoundException($"Film studio with ID {id} not found.");
-            }
+            var studio = _context.FilmStudios
+                .Include(fs => fs.RentedFilms) // För att inkludera filmkopior som hyrts ut
+                .FirstOrDefault(fs => fs.FilmStudioId == id);
             return studio;
         }
 
-        //Get all filmstudios
+        // Hämta alla filmstudios
         public List<FilmStudio> GetAllFilmStudios()
         {
-            return _filmStudios;
+            return _context.FilmStudios
+                .Include(fs => fs.RentedFilms) // För att inkludera filmkopior
+                .ToList();
         }
 
-        //Get all rented filmcopies for a specific filmstudio
+        // Hämta alla hyrda filmkopior för en specifik filmstudio
         public List<FilmCopy> GetRentedFilmCopies(int id)
         {
-            var studio = _filmStudios.FirstOrDefault(fs => fs.FilmStudioId == id);
+            var studio = _context.FilmStudios
+                .Include(fs => fs.RentedFilms)
+                .FirstOrDefault(fs => fs.FilmStudioId == id);
             return studio?.RentedFilms ?? new List<FilmCopy>();
         }
 
-        //Rent a filmcopy
-        public bool RentFilmToStudio(int studioId, FilmCopy filmCopyId)
-        {   
-            var studio = _filmStudios.FirstOrDefault(fs => fs.FilmStudioId == studioId);
-            if (studio == null) return false;
-
-            studio.RentedFilms.Add(filmCopyId);
-            return true;
-        }
-
-        //Get authenticated filmstudio ID
-        private int? GetAuthenticatedStudioId()
+        // Hyr ut en filmkopia till en filmstudio
+        public bool RentFilmToStudio(int studioId, FilmCopy filmCopy)
         {
-            //Get authenticated filmstudioid
-            return 1;
+            var studio = _context.FilmStudios.FirstOrDefault(fs => fs.FilmStudioId == studioId);
+            if (studio == null) 
+            {
+                Console.WriteLine($"Film studio with ID {studioId} not found.");
+                return false;
+            }
+
+            // Logga information om filmkopian
+            var filmExists = studio.RentedFilms.Any(fc => fc.FilmCopyId == filmCopy.FilmCopyId);
+            if (filmExists)
+            {
+                Console.WriteLine($"FilmCopy with ID {filmCopy.FilmCopyId} already rented.");
+            }
+            else
+            {
+                Console.WriteLine($"FilmCopy with ID {filmCopy.FilmCopyId} does not exist in rented films.");
+            }
+
+            // Lägg till filmkopian om den inte redan finns i hyrda filmer
+            studio.RentedFilms.Add(filmCopy);
+            return true;
         }
     }
 }
