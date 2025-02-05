@@ -8,7 +8,7 @@ namespace FilmStudioSFF.Services
         private readonly List<FilmStudio> _filmStudios = new List<FilmStudio>();
 
         //Register new filmstudio
-        public FilmStudio RegisterFilmstudio(IRegisterFilmStudio registerFilmStudio)
+        public FilmStudio RegisterFilmStudio(IRegisterFilmStudio registerFilmStudio)
         {
             if (_filmStudios.Any(fs => fs.Name == registerFilmStudio.Name))
             {
@@ -21,6 +21,7 @@ namespace FilmStudioSFF.Services
                 Name = registerFilmStudio.Name,
                 City = registerFilmStudio.City,
                 Username = registerFilmStudio.Username,
+                Email = registerFilmStudio.Email,
                 RentedFilms = new List<FilmCopy>()
             };
             
@@ -31,6 +32,7 @@ namespace FilmStudioSFF.Services
         //Get speicifc filmstudio based on id
         public FilmStudio GetFilmStudioById(int id)
         {
+            Console.WriteLine($"Film studios count: {_filmStudios.Count}");  // Debugging
             var studio = _filmStudios.FirstOrDefault(fs => fs.FilmStudioId == id);
             if (studio == null)
             {
@@ -60,6 +62,13 @@ namespace FilmStudioSFF.Services
 
             studio.RentedFilms.Add(filmCopyId);
             return true;
+        }
+
+        //Get authenticated filmstudio ID
+        private int? GetAuthenticatedStudioId()
+        {
+            //Get authenticated filmstudioid
+            return 1;
         }
     }
 }
