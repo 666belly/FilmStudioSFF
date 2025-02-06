@@ -1,6 +1,7 @@
 using FilmStudioSFF.Models;
 using FilmStudioSFF.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FilmStudioSFF.Controllers
 {
@@ -9,9 +10,10 @@ namespace FilmStudioSFF.Controllers
     public class FilmStudioController : ControllerBase
     {
         private readonly FilmStudioService _filmStudioService;
-
-        public FilmStudioController(FilmStudioService filmStudioService)
+        private readonly FilmStudioSFF.Services.AuthenticationService _authService;
+        public FilmStudioController(FilmStudioService filmStudioService, AuthenticationService authService)
         {
+            _authService = authService;
             _filmStudioService = filmStudioService;
         }
 
@@ -33,6 +35,29 @@ namespace FilmStudioSFF.Controllers
             return Ok(newStudio);
         }
 
+        //POST login filmstudio
+        [HttpPost("login")]
+        public IActionResult LoginFilmStudio([FromBody] FilmStudioLogin loginModel)
+        {
+            if (loginModel == null)
+            {
+                return BadRequest("Ogiltig input");
+            }
+
+            var studio = _filmStudioService.FilmStudioLogin(loginModel.Username, loginModel.Password);
+            if (studio == null)
+            {
+                return Unauthorized("Felaktigt användarnamn eller lösenord");
+            }
+
+            // Generera JWT-token för den inloggade användaren
+            var token = _authService.GenerateJwtToken(studio.Username, studio.Role, studio.FilmStudioId);
+            
+            // Skicka tillbaka både filmstudion och JWT-token
+            return Ok(new { filmStudio = studio, token });
+        }
+
+
         //GET specific filmstudio based on id
         [HttpGet("{id}")]   
         public IActionResult GetFilmStudioById(int id)
@@ -48,6 +73,7 @@ namespace FilmStudioSFF.Controllers
 
         //GET all filmstudios
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public IActionResult GetAllFilmStudios()
         {
             var studios = _filmStudioService.GetAllFilmStudios();
@@ -72,10 +98,17 @@ namespace FilmStudioSFF.Controllers
             return Ok("Filmen har hyrts ut.");
         }
 
-        public List<FilmCopy> GetRentedFilmCopies(int studioId)
+        // GET rented film copies for a specific film studio
+        [HttpGet("{studioId}/rented-films")]
+        public IActionResult GetRentedFilmCopies(int studioId)
         {
             var studio = _filmStudioService.GetFilmStudioById(studioId);
-            return studio?.RentedFilms ?? new List<FilmCopy>();
+            if (studio == null)
+            {
+                return NotFound($"Filmstudion med ID {studioId} hittades inte");
+            }
+
+            return Ok(studio.RentedFilms ?? new List<FilmCopy>());
         }
 
     }

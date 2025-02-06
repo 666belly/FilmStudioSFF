@@ -52,7 +52,7 @@ namespace FilmStudioSFF.Controllers
                 return Unauthorized("Invalid username or password.");
             }
 
-            var token = _authService.GenerateJwtToken(user);
+            var token = _authService.GenerateJwtToken(user.Username, user.Role, user.UserId);
             return Ok(new { Token = token });
         }
 
