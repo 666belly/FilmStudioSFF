@@ -10,28 +10,28 @@ namespace FilmStudioSFF.Services
     public class AuthenticationService 
     {
         private const string SecretKey = "YourSuperSecretKey1234567890abcdef";    
-        
-        public string GenerateJwtToken(UserRegister userRegister)
-        {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256); 
 
-            var claims = new[]
+            public string GenerateJwtToken(string username, string role, int id)
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userRegister.UserId.ToString()),   
-                new Claim(JwtRegisteredClaimNames.UniqueName, userRegister.Username),    
-                new Claim("role", userRegister.Role)                                     
-            };
+                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey));
+                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
-                issuer: "FilmStudioSFF",
-                audience: "FilmStudioSFF",
-                claims: claims,
-                expires: DateTime.Now.AddHours(1),
-                signingCredentials: credentials
-            );
+                var claims = new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, id.ToString()),
+                    new Claim(JwtRegisteredClaimNames.UniqueName, username),
+                    new Claim("role", role) 
+                };
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+                var token = new JwtSecurityToken(
+                    issuer: "FilmStudioSFF",
+                    audience: "FilmStudioSFF",
+                    claims: claims,
+                    expires: DateTime.Now.AddHours(1),
+                    signingCredentials: credentials
+                );
+
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
     }
 }

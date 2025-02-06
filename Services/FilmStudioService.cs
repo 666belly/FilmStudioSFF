@@ -27,12 +27,27 @@ namespace FilmStudioSFF.Services
                 City = registerFilmStudio.City,
                 Username = registerFilmStudio.Username,
                 Email = registerFilmStudio.Email,
+                Password = registerFilmStudio.Password,
+                Role = registerFilmStudio.Role,
                 RentedFilms = new List<FilmCopy>()
             };
+
+            newStudio.Password = BCrypt.Net.BCrypt.HashPassword(newStudio.Password);
 
             _context.FilmStudios.Add(newStudio);
             _context.SaveChanges();
             return newStudio;
+        }
+
+        // Logga in en filmstudio   
+        public FilmStudio? FilmStudioLogin(string username, string password)
+        {
+            var studio = _context.FilmStudios.FirstOrDefault(s => s.Username == username);
+            if (studio != null && BCrypt.Net.BCrypt.Verify(password, studio.Password))
+            {
+                return studio;
+            }
+            return null;
         }
 
         // Hämta en specifik filmstudio baserat på ID
