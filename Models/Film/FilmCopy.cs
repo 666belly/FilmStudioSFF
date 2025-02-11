@@ -6,6 +6,6 @@ namespace FilmStudioSFF.Models
     {
         public int FilmCopyId { get; set; }  
         public required string Title { get; set; }
-        public bool IsAvailable { get; set; }
+        public bool IsRented { get; set; }
     }
 }

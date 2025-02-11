@@ -60,13 +60,41 @@ namespace FilmStudioSFF.Services
             return studio;
         }
 
-        // Hämta alla filmstudios
-        public List<FilmStudio> GetAllFilmStudios()
+        // // Hämta alla filmstudios
+        public List<FilmStudioDTO> GetAllFilmStudios(string? userRole, bool includeFullDetails)
         {
-            return _context.FilmStudios
+            var studios = _context.FilmStudios
+                .Include(studio => studio.RentedFilms)  // Eager load related data
                 .ToList();
-        }
 
+            if (includeFullDetails && userRole == "admin")
+            {
+                // Return full details for admin including City and RentedFilms
+                return studios.Select(studio => new FilmStudioDTO
+                {
+                    FilmStudioId = studio.FilmStudioId,
+                    Name = studio.Name,
+                    Username = studio.Username,
+                    Role = studio.Role,
+                    Email = studio.Email,
+                    City = studio.City,              
+                    RentedFilms = studio.RentedFilms  
+                }).ToList();  // List<IFilmStudio>
+            }
+            else
+            {
+                // For non-admin, return a reduced version without City and RentedFilms
+                return studios.Select(studio => new FilmStudioDTO
+                {
+                    FilmStudioId = studio.FilmStudioId,
+                    Name = studio.Name,
+                    Username = studio.Username,
+                    Role = studio.Role,
+                    Email = studio.Email
+                    // City and RentedFilms are excluded for non-admin users
+                }).ToList();  // List<IFilmStudio>
+            }
+        }
         // Hämta alla hyrda filmkopior för en specifik filmstudio
         public List<FilmCopy> GetRentedFilms(int id)
         {

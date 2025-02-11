@@ -3,6 +3,7 @@ using FilmStudioSFF.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace FilmStudioSFF.Controllers
 {
@@ -75,18 +76,24 @@ namespace FilmStudioSFF.Controllers
         }
 
         //GET all filmstudios
-        [HttpGet] 
+
+        [HttpGet]
+        [Authorize]
         public IActionResult GetAllFilmStudios()
         {
-            Debug.WriteLine("GET request received for all film studios");
-            var studios = _filmStudioService.GetAllFilmStudios();
+            //check if user is admin
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            bool includeFullDetails = userRole == "admin"; // if admin include full details
+
+            var studios = _filmStudioService.GetAllFilmStudios(userRole, includeFullDetails);
+
             return Ok(studios);
         }
 
-
         // GET rented film copies for a specific film studio
         [HttpGet("{studioId}/rented-films")]
-        // [Authorize(Roles = "filmstudio")]
+        //[Authorize(Roles = "filmstudio")]
         public IActionResult GetRentedFilmCopies(int studioId)
         {
             var studio = _filmStudioService.GetFilmStudioById(studioId);

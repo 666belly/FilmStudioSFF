@@ -11,27 +11,28 @@ namespace FilmStudioSFF.Services
     {
         private const string SecretKey = "YourSuperSecretKey1234567890abcdef";    
 
-            public string GenerateJwtToken(string username, string role, int id)
+
+        public string GenerateJwtToken(string username, string role, int id)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
             {
-                var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(SecretKey));
-                var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+                new Claim(JwtRegisteredClaimNames.Sub, id.ToString()),
+                new Claim(JwtRegisteredClaimNames.UniqueName, username),
+                new Claim(ClaimTypes.Role, role) // Ändra till ClaimTypes.Role
+            };
 
-                var claims = new[]
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, id.ToString()),
-                    new Claim(JwtRegisteredClaimNames.UniqueName, username),
-                    new Claim("role", role) 
-                };
+            var token = new JwtSecurityToken(
+                issuer: "FilmStudioSFF",
+                audience: "FilmStudioSFF",
+                claims: claims,
+                expires: DateTime.Now.AddHours(1),
+                signingCredentials: credentials
+            );
 
-                var token = new JwtSecurityToken(
-                    issuer: "FilmStudioSFF",
-                    audience: "FilmStudioSFF",
-                    claims: claims,
-                    expires: DateTime.Now.AddHours(1),
-                    signingCredentials: credentials
-                );
-
-                return new JwtSecurityTokenHandler().WriteToken(token);
-            }
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
     }
 }
