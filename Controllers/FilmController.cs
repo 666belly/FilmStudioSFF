@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using FilmStudioSFF.Models;
 using FilmStudioSFF.Services;
 using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
+using FilmStudioSFF.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace FilmStudioSFF.Controllers
 {
@@ -10,9 +12,10 @@ namespace FilmStudioSFF.Controllers
     public class FilmController : ControllerBase
     {
         private readonly FilmService _filmService;
-
-        public FilmController(FilmService filmService)
+        private readonly FilmStudioService _filmStudioService;
+        public FilmController(FilmService filmService, FilmStudioService filmStudioService)
         {
+            _filmStudioService = filmStudioService;
             _filmService = filmService;
         }
 
@@ -33,10 +36,13 @@ namespace FilmStudioSFF.Controllers
         [HttpGet("{id}")]
         public ActionResult<Film> GetFilmById(int id)
         {
+
+            Console.WriteLine($"Received GET request for film with ID {id}");
+
             var film = _filmService.GetFilmById(id);
             if (film == null)
             {
-                return NotFound(); //returnstatus 404notfound
+                return NotFound(); // Return status 404 if the film is not found
             }
 
             return Ok(film); //returnstatus 200ok
@@ -44,6 +50,7 @@ namespace FilmStudioSFF.Controllers
 
         //POST: api/film
         [HttpPost]
+        // [Authorize(Roles = "Admin")]
         public ActionResult<Film> AddFilm([FromBody] Film newFilm)
         {
             if (newFilm == null)
@@ -68,6 +75,81 @@ namespace FilmStudioSFF.Controllers
             _filmService.DeleteFilm(id);
             return NoContent(); //returnstatus 204nocontent
         }
+
+
+        //PATCH: api/film/id
+        [HttpPatch("{id}")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult UpdateFilm(int id, [FromBody] Film updatedFilm)
+        {
+            if (updatedFilm == null || id != updatedFilm.FilmId)
+            {
+                return BadRequest("Ogiltiga uppgifter.");
+            }
+
+            var existingFilm = _filmService.GetFilmById(id);
+            if (existingFilm == null)
+            {
+                return NotFound($"Filmen med ID {id} hittades inte.");
+            }
+
+            _filmService.UpdateFilm(updatedFilm, id);
+            return Ok(updatedFilm);
+        }
+
+        //POST: api/filmstudio/{studioId}/rent
+        [HttpPost("{studioId}/rent")]
+        public IActionResult RentFilmToStudio(int studioId, [FromBody] FilmCopy filmCopy)
+        {
+            if (filmCopy == null)
+            {
+                return BadRequest("Ogiltig film.");
+            }
+
+            var success = _filmStudioService.RentFilmToStudio(studioId, filmCopy);
+            if (!success)
+            {
+                return NotFound("Filmstudion hittades inte.");
+            }
+
+            return Ok("Filmen har hyrts ut.");
+        }
+
+        //POST: api/filmstudio/return
+        [HttpPost("return")]
+        [Authorize(Roles = "filmstudio")]
+        public IActionResult ReturnFilm([FromBody] ReturnRequest returnRequest)
+        {
+            if (returnRequest == null || returnRequest.FilmCopyId <= 0)
+            {
+                return BadRequest("Ogiltig begäran.");
+            }
+
+            var studioId = GetAuthenticatedStudioId(User);
+            if (studioId == null)
+            {
+                return Unauthorized("Du måste vara inloggad som filmstudio.");
+            }
+
+            var success = _filmStudioService.ReturnRequest(studioId.Value, returnRequest.FilmCopyId);
+            if (!success)
+            {
+                return NotFound("Filmen kunde inte returneras.");
+            }
+
+            return Ok("Filmen har returnerats.");
+        }
+
+        private int? GetAuthenticatedStudioId(System.Security.Claims.ClaimsPrincipal user)
+        {
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int studioId))
+            {
+                return studioId;
+            }
+            return null;
+        }
+
 
     }    
 }
