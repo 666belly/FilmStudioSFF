@@ -1,6 +1,7 @@
 using FilmStudioSFF.Models;
 using FilmStudioSFF.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace FilmStudioSFF.Services
 {
@@ -54,7 +55,7 @@ namespace FilmStudioSFF.Services
         public FilmStudio? GetFilmStudioById(int id)
         {
             var studio = _context.FilmStudios
-                .Include(fs => fs.RentedFilms) // För att inkludera filmkopior som hyrts ut
+                .Include(fs => fs.RentedFilms) 
                 .FirstOrDefault(fs => fs.FilmStudioId == id);
             return studio;
         }
@@ -63,12 +64,11 @@ namespace FilmStudioSFF.Services
         public List<FilmStudio> GetAllFilmStudios()
         {
             return _context.FilmStudios
-                .Include(fs => fs.RentedFilms) // För att inkludera filmkopior
                 .ToList();
         }
 
         // Hämta alla hyrda filmkopior för en specifik filmstudio
-        public List<FilmCopy> GetRentedFilmCopies(int id)
+        public List<FilmCopy> GetRentedFilms(int id)
         {
             var studio = _context.FilmStudios
                 .Include(fs => fs.RentedFilms)
@@ -86,20 +86,50 @@ namespace FilmStudioSFF.Services
                 return false;
             }
 
-            // Logga information om filmkopian
-            var filmExists = studio.RentedFilms.Any(fc => fc.FilmCopyId == filmCopy.FilmCopyId);
-            if (filmExists)
-            {
-                Console.WriteLine($"FilmCopy with ID {filmCopy.FilmCopyId} already rented.");
-            }
-            else
-            {
-                Console.WriteLine($"FilmCopy with ID {filmCopy.FilmCopyId} does not exist in rented films.");
-            }
-
-            // Lägg till filmkopian om den inte redan finns i hyrda filmer
             studio.RentedFilms.Add(filmCopy);
             return true;
         }
+
+
+        public bool ReturnRequest(int studioId, int filmCopyId)
+        {
+            var studio = _context.FilmStudios
+                .Include(fs => fs.RentedFilms)
+                .FirstOrDefault(fs => fs.FilmStudioId == studioId);
+
+            if (studio == null)
+            {
+                Console.WriteLine($"Filmstudio med ID {studioId} hittades inte.");
+                return false;
+            }
+
+            var filmCopy = studio.RentedFilms.FirstOrDefault(fc => fc.FilmCopyId == filmCopyId);
+            if (filmCopy == null)
+            {
+                Console.WriteLine($"Film med ID {filmCopyId} hittades inte i hyrda filmer.");
+                return false;
+            }
+
+            studio.RentedFilms.Remove(filmCopy);
+            _context.SaveChanges();
+            return true;
+        }
+
+        internal object GetAllFilmCopies()
+        {
+            throw new NotImplementedException();
+        }
+
+        // private int? GetAuthenticatedStudioId(ClaimsPrincipal user)
+        // {
+        //     var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+        //     if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int studioId))
+        //     {
+        //         return studioId;
+        //     }
+        //     return null;
+        // }
+
+
     }
 }

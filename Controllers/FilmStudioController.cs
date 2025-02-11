@@ -2,6 +2,7 @@ using FilmStudioSFF.Models;
 using FilmStudioSFF.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Diagnostics;
 
 namespace FilmStudioSFF.Controllers
 {
@@ -11,11 +12,15 @@ namespace FilmStudioSFF.Controllers
     {
         private readonly FilmStudioService _filmStudioService;
         private readonly FilmStudioSFF.Services.AuthenticationService _authService;
-        public FilmStudioController(FilmStudioService filmStudioService, AuthenticationService authService)
+        private readonly ILogger<FilmStudioController> _logger;
+
+        public FilmStudioController(FilmStudioService filmStudioService, AuthenticationService authService, ILogger<FilmStudioController> logger)
         {
-            _authService = authService;
+            _logger = logger;
             _filmStudioService = filmStudioService;
+            _authService = authService;
         }
+        
 
         //POST register new filmstudio
         [HttpPost("register")]
@@ -50,10 +55,8 @@ namespace FilmStudioSFF.Controllers
                 return Unauthorized("Felaktigt användarnamn eller lösenord");
             }
 
-            // Generera JWT-token för den inloggade användaren
             var token = _authService.GenerateJwtToken(studio.Username, studio.Role, studio.FilmStudioId);
             
-            // Skicka tillbaka både filmstudion och JWT-token
             return Ok(new { filmStudio = studio, token });
         }
 
@@ -72,34 +75,18 @@ namespace FilmStudioSFF.Controllers
         }
 
         //GET all filmstudios
-        [HttpGet]
-        [Authorize(Roles = "admin")]
+        [HttpGet] 
         public IActionResult GetAllFilmStudios()
         {
+            Debug.WriteLine("GET request received for all film studios");
             var studios = _filmStudioService.GetAllFilmStudios();
             return Ok(studios);
         }
 
-        //POST rent a filmcopy to a filmstudio
-        [HttpPost("{studioId}/rent")]
-        public IActionResult RentFilmToStudio(int studioId, [FromBody] FilmCopy filmCopy)
-        {
-            if (filmCopy == null)
-            {
-                return BadRequest("Ogiltig film.");
-            }
-
-            var success = _filmStudioService.RentFilmToStudio(studioId, filmCopy);
-            if (!success)
-            {
-                return NotFound("Filmstudion hittades inte.");
-            }
-
-            return Ok("Filmen har hyrts ut.");
-        }
 
         // GET rented film copies for a specific film studio
         [HttpGet("{studioId}/rented-films")]
+        // [Authorize(Roles = "filmstudio")]
         public IActionResult GetRentedFilmCopies(int studioId)
         {
             var studio = _filmStudioService.GetFilmStudioById(studioId);

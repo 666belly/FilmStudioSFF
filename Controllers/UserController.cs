@@ -41,8 +41,8 @@ namespace FilmStudioSFF.Controllers
         }
 
         //POST api/user/login
-        [HttpPost("login")]
-        public ActionResult<string> Login([FromBody] UserAuthenticate loginRequest)
+        [HttpPost("authenticate")]
+        public ActionResult<string> Authenticate([FromBody] UserAuthenticate loginRequest)
         {
             var user = _userService.AuthenticateUser(loginRequest);
             if (user is null)

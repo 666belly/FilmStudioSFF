@@ -31,7 +31,7 @@ namespace FilmStudioSFF.Controllers
                 return Unauthorized("Du måste vara inloggad som filmstudio.");
             }
 
-            var rentedFilms = _filmStudioService.GetRentedFilmCopies(studioId.Value);
+            var rentedFilms = _filmStudioService.GetRentedFilms(studioId.Value);
             return Ok(rentedFilms);
         }
 
