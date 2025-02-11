@@ -16,12 +16,69 @@ namespace FilmStudioSFF.Services
         public FilmService(FilmStudioDbContext context)
         {
             _context = context;
+
+            if (_films.Count == 0)
+            {
+                _films.AddRange(new List<Film>
+                {
+                    new Film
+                    {
+                        FilmId = 1,
+                        Title = "Inception",
+                        Genre = "Sci-Fi",
+                        Director = "Christopher Nolan",
+                        Year = 2010,
+                        Description = "A mind-bending thriller about dreams within dreams.",
+                        FilmCopies = new List<FilmCopy> 
+                        {
+                            new FilmCopy { FilmCopyId = 1, IsRented = false, Title = "Inception" },
+                            new FilmCopy { FilmCopyId = 2, IsRented = true, Title = "Inception" }
+                        }
+                    },
+                    new Film
+                    {
+                        FilmId = 2,
+                        Title = "The Matrix",
+                        Genre = "Sci-Fi",
+                        Director = "Lana Wachowski, Lilly Wachowski",
+                        Year = 1999,
+                        Description = "A computer hacker learns the truth about the world.",
+                        FilmCopies = new List<FilmCopy>
+                        {
+                            new FilmCopy { FilmCopyId = 3, IsRented = false, Title = "The Matrix" }
+                        }
+                    },
+                    new Film
+                    {
+                        FilmId = 3,
+                        Title = "The Godfather",
+                        Genre = "Crime",
+                        Director = "Francis Ford Coppola",
+                        Year = 1972,
+                        Description = "The aging patriarch of an organized crime dynasty transfers control to his reluctant son.",
+                        FilmCopies = new List<FilmCopy> 
+                        {
+                            new FilmCopy { FilmCopyId = 4, IsRented = true, Title = "The Godfather" }
+                        }
+                    }
+                });
+            }
         }
 
         //Get all films
         public List<Film> GetAllFilms()
         {
-            return _films;
+            return _films.Select(film => new Film
+            {
+                FilmId = film.FilmId,
+                Title = film.Title,
+                Genre = film.Genre,
+                Director = film.Director,
+                Year = film.Year,
+                Description = film.Description,
+                FilmCopies = film.FilmCopies
+            }).ToList();        
+            
         }
 
         //Get film by id
@@ -47,7 +104,6 @@ namespace FilmStudioSFF.Services
             {
                 existingFilm.Title = film.Title;
                 existingFilm.Description = film.Description;
-                existingFilm.AvailableCopies = film.AvailableCopies;
             }
         } 
 
