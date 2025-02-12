@@ -10,61 +10,59 @@ namespace FilmStudioSFF.Services
 {
     public class FilmService
     {
-        private List<Film> _films = new List<Film>();
-        private readonly FilmStudioDbContext _context;
+        private readonly FilmStudioDbContext? _context;
 
-        public FilmService(FilmStudioDbContext context)
+        private readonly List<Film> _films;
+
+        public FilmService()
         {
-            _context = context;
-
-            if (_films.Count == 0)
+            // Mockdata för filmer och kopior
+            _films = new List<Film>
             {
-                _films.AddRange(new List<Film>
+                new Film
                 {
-                    new Film
+                    FilmId = 1,
+                    Title = "The Matrix",
+                    Genre = "Action",
+                    Director = "The Wachowskis",
+                    Year = 1999,
+                    Description = "A hacker learns that the world he lives in is a simulation.",
+                    FilmCopies = new List<FilmCopy>
                     {
-                        FilmId = 1,
-                        Title = "Inception",
-                        Genre = "Sci-Fi",
-                        Director = "Christopher Nolan",
-                        Year = 2010,
-                        Description = "A mind-bending thriller about dreams within dreams.",
-                        FilmCopies = new List<FilmCopy> 
-                        {
-                            new FilmCopy { FilmCopyId = 1, IsRented = false, Title = "Inception" },
-                            new FilmCopy { FilmCopyId = 2, IsRented = true, Title = "Inception" }
-                        }
-                    },
-                    new Film
-                    {
-                        FilmId = 2,
-                        Title = "The Matrix",
-                        Genre = "Sci-Fi",
-                        Director = "Lana Wachowski, Lilly Wachowski",
-                        Year = 1999,
-                        Description = "A computer hacker learns the truth about the world.",
-                        FilmCopies = new List<FilmCopy>
-                        {
-                            new FilmCopy { FilmCopyId = 3, IsRented = false, Title = "The Matrix" }
-                        }
-                    },
-                    new Film
-                    {
-                        FilmId = 3,
-                        Title = "The Godfather",
-                        Genre = "Crime",
-                        Director = "Francis Ford Coppola",
-                        Year = 1972,
-                        Description = "The aging patriarch of an organized crime dynasty transfers control to his reluctant son.",
-                        FilmCopies = new List<FilmCopy> 
-                        {
-                            new FilmCopy { FilmCopyId = 4, IsRented = true, Title = "The Godfather" }
-                        }
+                        new FilmCopy { FilmCopyId = 1, Title = "The Matrix - Copy 1", IsRented = false },
+                        new FilmCopy { FilmCopyId = 2, Title = "The Matrix - Copy 2", IsRented = false }
                     }
-                });
-            }
+                },
+                new Film
+                {
+                    FilmId = 2,
+                    Title = "Inception",
+                    Genre = "Sci-Fi",
+                    Director = "Christopher Nolan",
+                    Year = 2010,
+                    Description = "A thief who enters the dreams of others to steal secrets is given a task to plant an idea.",
+                    FilmCopies = new List<FilmCopy>
+                    {
+                        new FilmCopy { FilmCopyId = 3, Title = "Inception - Copy 1", IsRented = false },
+                        new FilmCopy { FilmCopyId = 4, Title = "Inception - Copy 2", IsRented = true }
+                    }
+                },
+                new Film
+                {
+                    FilmId = 3,
+                    Title = "The Dark Knight",
+                    Genre = "Action",
+                    Director = "Christopher Nolan",
+                    Year = 2008,
+                    Description = "Batman must face the Joker, a criminal mastermind who seeks to create chaos.",
+                    FilmCopies = new List<FilmCopy>
+                    {
+                        new FilmCopy { FilmCopyId = 5, Title = "The Dark Knight - Copy 1", IsRented = false },
+                        new FilmCopy { FilmCopyId = 6, Title = "The Dark Knight - Copy 2", IsRented = true }
+                    }
+                }
+            };
         }
-
         //Get all films
         public List<Film> GetAllFilms()
         {

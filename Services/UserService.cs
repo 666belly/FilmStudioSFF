@@ -101,12 +101,5 @@ namespace FilmStudioSFF.Services
         {
             return BCrypt.Net.BCrypt.HashPassword(password); // Hash the password using BCrypt
         }
-
-        // Verify if the entered password matches the stored hashed password
-        // public bool VerifyPassword(string password, string hashedPassword)
-        // {
-        //     return BCrypt.Net.BCrypt.Verify(password, hashedPassword); // Säkerställ att denna metod anropas korrekt
-        // }
-
     }
 }

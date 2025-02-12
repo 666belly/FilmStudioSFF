@@ -23,6 +23,7 @@ namespace FilmStudioSFF.Controllers
         }
 
         //POST api/user/register
+        // DONE - works
         [HttpPost("register")]  
         public ActionResult<UserRegister> RegisterUser([FromBody] UserRegister userRegister)
         {
@@ -41,6 +42,7 @@ namespace FilmStudioSFF.Controllers
         }
 
         //POST api/user/login
+        // DONE - works
         [HttpPost("authenticate")]
         public ActionResult<string> Authenticate([FromBody] UserAuthenticate loginRequest)
         {
@@ -57,6 +59,7 @@ namespace FilmStudioSFF.Controllers
         }
 
         //GET: api/user/id (get one user, admin can get all)
+        // 401 unauth Invalid user ID, auth doesnt work?
         [HttpGet("{id}")]
         [Authorize]
         public ActionResult<UserRegister> GetUser(int id)
@@ -67,11 +70,11 @@ namespace FilmStudioSFF.Controllers
                 return Unauthorized("Invalid user ID.");
             }
 
-            var requestingUserRole = User.FindFirst("role")?.Value;  // Här hämtar vi rollen från token
+            var requestingUserRole = User.FindFirst("role")?.Value;  
 
             if (requestingUserRole != "admin" && requestingUserId != id)
             {
-                return Forbid();  // Om användaren inte är admin eller den egna användaren, returnera 403 Forbidden
+                return Forbid();  
             }
 
             var user = _userService.GetUserById(id);
@@ -84,6 +87,7 @@ namespace FilmStudioSFF.Controllers
         }
 
         //GET: api/user/all (only admin)
+        //DONE - works
         [HttpGet("all")]
         [Authorize (Roles = "admin")]
         public ActionResult<IEnumerable<UserRegister>> GetAllUsers()

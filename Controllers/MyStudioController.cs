@@ -22,17 +22,24 @@ namespace FilmStudioSFF.Controllers
 
         }
 
+        // GET: api/mystudio/rentals
+        // 404 not found?? Inga uthyrda filmer.??? varför
         [HttpGet("rentals")]
-        public IActionResult GetRentedFilms()
+        public ActionResult<IEnumerable<FilmCopy>> GetRentalsForStudio()
         {
             var studioId = GetAuthenticatedStudioId();
-            if (studioId == null)
+            if (!studioId.HasValue)
             {
-                return Unauthorized("Du måste vara inloggad som filmstudio.");
+                return Unauthorized("Behörighet krävs.");
             }
 
-            var rentedFilms = _filmStudioService.GetRentedFilms(studioId.Value);
-            return Ok(rentedFilms);
+            var rentals = _filmStudioService.GetRentalsForStudio(studioId.Value);
+            if (rentals == null || !rentals.Any())
+            {
+                return NotFound("Inga uthyrda filmer.");
+            }
+
+            return Ok(rentals);
         }
 
         private int? GetAuthenticatedStudioId()
