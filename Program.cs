@@ -24,13 +24,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddDbContext<FilmStudioDbContext>(options =>
-    options.UseInMemoryDatabase("InMemoryDb"));
+    options.UseInMemoryDatabase("FilmStudioSFF"));
 
 builder.Services.AddControllers();
 
 builder.Services.AddSingleton<UserService>(); 
 builder.Services.AddSingleton<AuthenticationService>(); 
-builder.Services.AddScoped<FilmStudioService>();  // 
+builder.Services.AddScoped<FilmStudioService>();  
 builder.Services.AddScoped<FilmService>();
 
 builder.Services.AddEndpointsApiExplorer();
