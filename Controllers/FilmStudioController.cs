@@ -24,6 +24,8 @@ namespace FilmStudioSFF.Controllers
         
 
         //POST register new filmstudio
+        //api/filmstudio/register
+        // DONE - works
         [HttpPost("register")]
         public IActionResult RegisterFilmStudio([FromBody] FilmStudio filmStudio)
         {
@@ -42,6 +44,8 @@ namespace FilmStudioSFF.Controllers
         }
 
         //POST login filmstudio
+        //api/filmstudio/login
+        // DONE - works
         [HttpPost("login")]
         public IActionResult LoginFilmStudio([FromBody] FilmStudioLogin loginModel)
         {
@@ -63,20 +67,23 @@ namespace FilmStudioSFF.Controllers
 
 
         //GET specific filmstudio based on id
+        //api/filmstudio/id
+        // DONE - works
         [HttpGet("{id}")]   
         public IActionResult GetFilmStudioById(int id)
         {
-            var studio = _filmStudioService.GetFilmStudioById(id);
-            if (studio == null)
-            {
-                return NotFound($"Filmstudion med ID {id} hittades inte");
-            }
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            return Ok(studio); //200 OK
+            bool includeFullDetails = userRole == "admin"; // if admin include full details
+
+            var studio = _filmStudioService.GetFilmStudioById(id, userRole, includeFullDetails);
+
+            return Ok(studio);
         }
 
         //GET all filmstudios
-
+        //api/filmstudio
+        // DONE - works
         [HttpGet]
         [Authorize]
         public IActionResult GetAllFilmStudios()
@@ -92,11 +99,15 @@ namespace FilmStudioSFF.Controllers
         }
 
         // GET rented film copies for a specific film studio
+        // api/filmstudio/{studioId}/rented-films
+        // 200 ok but doesnt fetch list corretly??? 
         [HttpGet("{studioId}/rented-films")]
-        //[Authorize(Roles = "filmstudio")]
-        public IActionResult GetRentedFilmCopies(int studioId)
+        [Authorize(Roles = "filmstudio")]
+        public IActionResult GetRentedFilms(int studioId)
         {
-            var studio = _filmStudioService.GetFilmStudioById(studioId);
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            bool includeFullDetails = userRole == "admin"; 
+            var studio = _filmStudioService.GetFilmStudioById(studioId, userRole, includeFullDetails);
             if (studio == null)
             {
                 return NotFound($"Filmstudion med ID {studioId} hittades inte");

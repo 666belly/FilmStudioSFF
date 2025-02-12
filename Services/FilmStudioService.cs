@@ -2,6 +2,8 @@ using FilmStudioSFF.Models;
 using FilmStudioSFF.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.VisualBasic;
+using Microsoft.AspNetCore.Identity;
 
 namespace FilmStudioSFF.Services
 {
@@ -52,12 +54,44 @@ namespace FilmStudioSFF.Services
         }
 
         // Hämta en specifik filmstudio baserat på ID
-        public FilmStudio? GetFilmStudioById(int id)
+        public FilmStudioDTO? GetFilmStudioById(int id, string? userRole, bool includeFullDetails)
         {
             var studio = _context.FilmStudios
-                .Include(fs => fs.RentedFilms) 
-                .FirstOrDefault(fs => fs.FilmStudioId == id);
-            return studio;
+                .Include(studio => studio.RentedFilms)  // Eager load related data
+                .FirstOrDefault(studio => studio.FilmStudioId == id);
+        
+            if (studio == null)
+            {
+                return null;
+            }
+        
+            if (includeFullDetails && userRole == "admin")
+            {
+                // Return full details for admin including City and RentedFilms
+                return new FilmStudioDTO
+                {
+                    FilmStudioId = studio.FilmStudioId,
+                    Name = studio.Name,
+                    Username = studio.Username,
+                    Role = studio.Role,
+                    Email = studio.Email,
+                    City = studio.City,              
+                    RentedFilms = studio.RentedFilms  
+                };
+            }
+            else
+            {
+                // For non-admin, return a reduced version without City and RentedFilms
+                return new FilmStudioDTO
+                {
+                    FilmStudioId = studio.FilmStudioId,
+                    Name = studio.Name,
+                    Username = studio.Username,
+                    Role = studio.Role,
+                    Email = studio.Email
+                    // City and RentedFilms are excluded for non-admin users
+                };
+            }
         }
 
         // // Hämta alla filmstudios
@@ -105,19 +139,46 @@ namespace FilmStudioSFF.Services
         }
 
         // Hyr ut en filmkopia till en filmstudio
+
         public bool RentFilmToStudio(int studioId, FilmCopy filmCopy)
         {
-            var studio = _context.FilmStudios.FirstOrDefault(fs => fs.FilmStudioId == studioId);
-            if (studio == null) 
+            // Hitta filmstudion
+            var studio = _context.FilmStudios.Include(fs => fs.RentedFilms).FirstOrDefault(fs => fs.FilmStudioId == studioId);
+            if (studio == null)
             {
-                Console.WriteLine($"Film studio with ID {studioId} not found.");
                 return false;
             }
 
-            studio.RentedFilms.Add(filmCopy);
+            // Kontrollera om filmkopian finns och inte är redan uthyrd
+            var filmCopyToRent = _context.FilmCopies.FirstOrDefault(fc => fc.FilmCopyId == filmCopy.FilmCopyId && !fc.IsRented);
+            if (filmCopyToRent == null)
+            {
+                return false; // Filmkopian är redan uthyrd eller finns inte
+            }
+
+            // Lägg till filmkopian till filmstudions hyrda filmer och uppdatera filmkopian
+            studio.RentedFilms.Add(filmCopyToRent);
+            filmCopyToRent.IsRented = true;  
+
+            _context.SaveChanges();  
             return true;
         }
+        public List<FilmCopy> GetRentalsForStudio(int studioId)
+        {
+            var filmCopyIds = _context.Rentals
+                                    .Where(r => r.StudioId == studioId)
+                                    .Select(r => r.FilmCopyId) 
+                                    .ToList();
 
+            if (!filmCopyIds.Any())
+            {
+                Console.WriteLine($"Inga uthyrningar hittades för studioId {studioId}");
+            }
+
+            return _context.FilmCopies
+                        .Where(fc => filmCopyIds.Contains(fc.FilmCopyId))
+                        .ToList(); 
+        }
 
         public bool ReturnRequest(int studioId, int filmCopyId)
         {
@@ -147,17 +208,6 @@ namespace FilmStudioSFF.Services
         {
             throw new NotImplementedException();
         }
-
-        // private int? GetAuthenticatedStudioId(ClaimsPrincipal user)
-        // {
-        //     var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
-        //     if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int studioId))
-        //     {
-        //         return studioId;
-        //     }
-        //     return null;
-        // }
-
 
     }
 }

@@ -20,6 +20,8 @@ namespace FilmStudioSFF.Controllers
         }
 
         //GET: api/film
+        //Kinda done
+        // Fetches the films from the database but not new films added via POST AddFilm? 
         [HttpGet]
         public ActionResult<IEnumerable<Film>> GetAllFilms()
         {
@@ -33,6 +35,8 @@ namespace FilmStudioSFF.Controllers
         }
 
         //GET: api/film/id
+        //DONE - works
+        //Fetches a film by ID from the database
         [HttpGet("{id}")]
         public ActionResult<Film> GetFilmById(int id)
         {
@@ -42,13 +46,14 @@ namespace FilmStudioSFF.Controllers
             var film = _filmService.GetFilmById(id);
             if (film == null)
             {
-                return NotFound(); // Return status 404 if the film is not found
+                return NotFound("Det finns ingen film med detta ID."); // Return status 404 if the film is not found
             }
 
             return Ok(film); //returnstatus 200ok
         }
 
         //POST: api/film
+        //Returns 201created byt does not add to the list properly
         [HttpPost]
         // [Authorize(Roles = "Admin")]
         public ActionResult<Film> AddFilm([FromBody] Film newFilm)
@@ -63,6 +68,7 @@ namespace FilmStudioSFF.Controllers
         }
         
         //DELETE: api/film/id
+        //Returns 204nocontent but does not remove the film from the list
         [HttpDelete("{id}")]
         public ActionResult DeleteFilm(int id)
         {
@@ -98,24 +104,58 @@ namespace FilmStudioSFF.Controllers
         }
 
         //POST: api/filmstudio/{studioId}/rent
+        //Returns 200ok but does not rent the film to the studio, does not add to list
         [HttpPost("{studioId}/rent")]
         public IActionResult RentFilmToStudio(int studioId, [FromBody] FilmCopy filmCopy)
         {
+            Console.WriteLine($"Received rent request for studio ID: {studioId} and FilmCopy ID: {filmCopy.FilmCopyId}");
+            
             if (filmCopy == null)
             {
-                return BadRequest("Ogiltig film.");
+                Console.WriteLine("Film copy is null.");
+                return BadRequest("Ogiltig filmkopia.");
             }
 
-            var success = _filmStudioService.RentFilmToStudio(studioId, filmCopy);
-            if (!success)
+            // Kontrollera om filmkopian finns i systemet och inte redan är uthyrd
+            var film = _filmService.GetFilmById(filmCopy.FilmCopyId);
+            if (film == null)
             {
-                return NotFound("Filmstudion hittades inte.");
+                Console.WriteLine($"Film with ID {filmCopy.FilmCopyId} not found.");
+                return NotFound("Filmen kunde inte hittas.");
             }
 
-            return Ok("Filmen har hyrts ut.");
+            var filmCopyToRent = film.FilmCopies.FirstOrDefault(fc => fc.FilmCopyId == filmCopy.FilmCopyId);
+            if (filmCopyToRent == null)
+            {
+                Console.WriteLine($"Film copy with ID {filmCopy.FilmCopyId} not found.");
+                return NotFound($"Filmkopia med ID {filmCopy.FilmCopyId} hittades inte.");
+            }
+
+            if (filmCopyToRent.IsRented)
+            {
+                Console.WriteLine($"Film copy {filmCopy.FilmCopyId} is already rented.");
+                return BadRequest("Filmkopian är redan uthyrd.");
+            }
+
+            // Kontrollera om filmstudion existerar
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            var isAdmin = userRole == "admin";
+            var studio = _filmStudioService.GetFilmStudioById(studioId, userRole, isAdmin);
+            if (studio == null)
+            {
+                Console.WriteLine($"Studio with ID {studioId} not found.");
+                return NotFound($"Filmstudio med ID {studioId} hittades inte.");
+            }
+
+            // Om allting är korrekt, markera filmen som uthyrd
+            filmCopyToRent.IsRented = true;
+            Console.WriteLine($"Film copy {filmCopy.FilmCopyId} rented successfully to studio {studioId}");
+
+            return Ok($"Filmkopian hyrdes ut till filmstudio med ID {studioId}.");
         }
 
         //POST: api/filmstudio/return
+        //save to test
         [HttpPost("return")]
         [Authorize(Roles = "filmstudio")]
         public IActionResult ReturnFilm([FromBody] ReturnRequest returnRequest)

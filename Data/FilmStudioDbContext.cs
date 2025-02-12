@@ -11,5 +11,7 @@ namespace FilmStudioSFF.Data
 
         public DbSet<FilmStudio> FilmStudios { get; set; }
         public DbSet<FilmCopy> FilmCopies { get; set; }
+        public DbSet<Rental> Rentals { get; set; }
     }
+
 }
