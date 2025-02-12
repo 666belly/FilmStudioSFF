@@ -4,6 +4,7 @@ using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 using FilmStudioSFF.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace FilmStudioSFF.Controllers
 {
@@ -13,6 +14,7 @@ namespace FilmStudioSFF.Controllers
     {
         private readonly FilmService _filmService;
         private readonly FilmStudioService _filmStudioService;
+
         public FilmController(FilmService filmService, FilmStudioService filmStudioService)
         {
             _filmStudioService = filmStudioService;
@@ -25,13 +27,13 @@ namespace FilmStudioSFF.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Film>> GetAllFilms()
         {
-            var filmService = _filmService.GetAllFilms();
-            if (filmService == null)
+            var films = _filmService.GetAllFilms();
+            if (films == null || !films.Any())
             {
-                return NotFound();
+                return NoContent();  // Returnera 204 om inga filmer finns
             }
 
-            return Ok(filmService); //returnstatus 200ok
+            return Ok(films);  //returnstatus 200ok
         }
 
         //GET: api/film/id
@@ -52,21 +54,21 @@ namespace FilmStudioSFF.Controllers
             return Ok(film); //returnstatus 200ok
         }
 
-        //POST: api/film
-        //Returns 201created byt does not add to the list properly
-        [HttpPost]
-        // [Authorize(Roles = "Admin")]
-        public ActionResult<Film> AddFilm([FromBody] Film newFilm)
-        {
-            if (newFilm == null)
-            {
-                return BadRequest(); //returnstatus 400badrequest
-            }
+        // POST: api/films
+[HttpPost]
+public ActionResult<Film> AddFilm([FromBody] Film newFilm)
+{
+    Console.WriteLine($"Received: {JsonSerializer.Serialize(newFilm)}");
 
-            _filmService.AddFilm(newFilm);
-            return CreatedAtAction(nameof(GetFilmById), new { id = newFilm.FilmId }, newFilm); //returnstatus 201created
-        }
-        
+    if (newFilm == null)
+    {
+        return BadRequest("Film data is required.");
+    }
+
+    var addedFilm = _filmService.AddFilm(newFilm);
+    return CreatedAtAction(nameof(GetAllFilms), new { id = addedFilm.FilmId }, addedFilm);
+}
+
         //DELETE: api/film/id
         //Returns 204nocontent but does not remove the film from the list
         [HttpDelete("{id}")]
@@ -99,7 +101,6 @@ namespace FilmStudioSFF.Controllers
                 return NotFound($"Filmen med ID {id} hittades inte.");
             }
 
-            _filmService.UpdateFilm(updatedFilm, id);
             return Ok(updatedFilm);
         }
 

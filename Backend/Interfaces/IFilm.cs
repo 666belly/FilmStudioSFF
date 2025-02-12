@@ -9,4 +9,6 @@ public interface IFilm
     string Director { get; set; }
     int Year { get; set; }
     string Description { get; set; }
+    bool IsAvailable { get; set; }
+    List<FilmCopy> FilmCopies { get; set; }
 }
