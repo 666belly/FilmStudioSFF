@@ -22,8 +22,7 @@ namespace FilmStudioSFF.Controllers
         }
 
         //GET: api/film
-        //Kinda done
-        // Fetches the films from the database but not new films added via POST AddFilm? 
+        //DONE - workds, fetches both films from mockdatabase and also films added via AddFilm
         [HttpGet]
         public ActionResult<IEnumerable<Film>> GetAllFilms()
         {
@@ -33,7 +32,7 @@ namespace FilmStudioSFF.Controllers
                 return NoContent();  // Returnera 204 om inga filmer finns
             }
 
-            return Ok(films);  //returnstatus 200ok
+            return Ok(films);  // Returnerar status 200 OK
         }
 
         //GET: api/film/id
@@ -55,19 +54,20 @@ namespace FilmStudioSFF.Controllers
         }
 
         // POST: api/films
-[HttpPost]
-public ActionResult<Film> AddFilm([FromBody] Film newFilm)
-{
-    Console.WriteLine($"Received: {JsonSerializer.Serialize(newFilm)}");
+        //DONE - works, films are added to the list
+        [HttpPost]
+        public ActionResult<Film> AddFilm([FromBody] Film newFilm)
+        {
+            Console.WriteLine($"Received: {JsonSerializer.Serialize(newFilm)}");
 
-    if (newFilm == null)
-    {
-        return BadRequest("Film data is required.");
-    }
+            if (newFilm == null)
+            {
+                return BadRequest("Film data is required.");
+            }
 
-    var addedFilm = _filmService.AddFilm(newFilm);
-    return CreatedAtAction(nameof(GetAllFilms), new { id = addedFilm.FilmId }, addedFilm);
-}
+            var addedFilm = _filmService.AddFilm(newFilm);
+            return CreatedAtAction(nameof(GetAllFilms), new { id = addedFilm.FilmId }, addedFilm);
+        }
 
         //DELETE: api/film/id
         //Returns 204nocontent but does not remove the film from the list
