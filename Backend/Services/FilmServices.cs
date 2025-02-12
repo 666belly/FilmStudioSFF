@@ -10,10 +10,18 @@ namespace FilmStudioSFF.Services
     public class FilmService
     {
         private readonly FilmStudioDbContext _context;
+        private readonly List<Film> _mockFilms; // Mock database
 
         public FilmService(FilmStudioDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            
+            // Mock data (exempel på mockfilmer)
+            _mockFilms = new List<Film>
+            {
+                new Film { FilmId = 0, Title = "Mock Film 1", Director = "Alan", Description = "Aionaogbn", Genre = "Action", Year = 2020 },
+                new Film { FilmId = 1, Title = "Mock Film 2", Director = "Alan", Description = "Aionaogbn", Genre = "Comedy", Year = 2021 }
+            };
         }
 
         // Add new film (to the database)
@@ -40,28 +48,48 @@ namespace FilmStudioSFF.Services
         // Get the next available FilmId (based on existing database records)
         public int GetNewFilmId()
         {
-            // This method now works with the database
-            if (!_context.Films.Any())  // Check if there are no films yet in the database
+            var existingFilmIds = _context.Films.Select(f => f.FilmId).ToList();
+            var mockFilmIds = _mockFilms.Select(f => f.FilmId).ToList();
+
+            var allFilmIds = existingFilmIds.Concat(mockFilmIds).ToList();
+
+            int newFilmId = 1; 
+            while (allFilmIds.Contains(newFilmId))
             {
-                return 1;  // Start from FilmId 1
+                newFilmId++;
             }
 
-            return _context.Films.Max(f => f.FilmId) + 1;  // Get the next available FilmId
+            return newFilmId;
         }
 
         // Get all films (now from the database only)
         public List<Film> GetAllFilms()
         {
-            // Hämta alla filmer direkt från databasen
+            // Fetch films from the real database
             var filmsFromDb = _context.Films.Include(f => f.FilmCopies).ToList();
 
-            return filmsFromDb;
+            // Combine films from the database and the mock database
+            var allFilms = filmsFromDb.Concat(_mockFilms).ToList();
+
+            return allFilms;
+            // // Hämta alla filmer direkt från databasen
+            // var filmsFromDb = _context.Films.Include(f => f.FilmCopies).ToList();
+
+            // return filmsFromDb;
         }
 
         // Get a specific film by its ID (from the database)
         public Film GetFilmById(int id)
         {
-            return _context.Films.FirstOrDefault(f => f.FilmId == id);
+            var filmFromDb = _context.Films.FirstOrDefault(f => f.FilmId == id);
+
+            if (filmFromDb == null)
+            {
+                var filmFromMock = _mockFilms.FirstOrDefault(f => f.FilmId == id);
+                return filmFromMock;
+            }
+
+            return filmFromDb;
         }
 
         // Update an existing film in the database
