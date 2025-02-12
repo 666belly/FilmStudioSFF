@@ -19,9 +19,47 @@ namespace FilmStudioSFF.Services
             // Mock data (exempel på mockfilmer)
             _mockFilms = new List<Film>
             {
-                new Film { FilmId = 0, Title = "Mock Film 1", Director = "Alan", Description = "Aionaogbn", Genre = "Action", Year = 2020 },
-                new Film { FilmId = 1, Title = "Mock Film 2", Director = "Alan", Description = "Aionaogbn", Genre = "Comedy", Year = 2021 }
+                new Film
+                {
+                    FilmId = 2, 
+                    Title = "Mock Film 2", 
+                    Director = "Alan", 
+                    Description = "Aionaogbn", 
+                    Genre = "Comedy", 
+                    Year = 2021,
+                    IsAvailable = true, // Här är filmen tillgänglig
+                    FilmCopies = new List<FilmCopy>
+                    {
+                        new FilmCopy
+                        {
+                            FilmCopyId = 2, 
+                            IsRented = false, // Filmkopian är inte uthyrd
+                            Title = "string"
+                        }
+                    }
+ 
+                },
+                new Film
+                {
+                    FilmId = 1, 
+                    Title = "Mock Film 2", 
+                    Director = "Alan", 
+                    Description = "Aionaogbn", 
+                    Genre = "Comedy", 
+                    Year = 2021,
+                    IsAvailable = true, // Här är filmen tillgänglig
+                    FilmCopies = new List<FilmCopy>
+                    {
+                        new FilmCopy
+                        {
+                            FilmCopyId = 1, 
+                            IsRented = false, // Filmkopian är inte uthyrd
+                            Title = "string"
+                        }
+                    }
+                }
             };
+
         }
 
         // Add new film (to the database)

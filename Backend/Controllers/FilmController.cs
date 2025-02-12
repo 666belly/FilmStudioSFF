@@ -105,7 +105,7 @@ namespace FilmStudioSFF.Controllers
         }
 
         //POST: api/filmstudio/{studioId}/rent
-        //Returns 200ok but does not rent the film to the studio, does not add to list
+        //working i guess?
         [HttpPost("{studioId}/rent")]
         public IActionResult RentFilmToStudio(int studioId, [FromBody] FilmCopy filmCopy)
         {
@@ -117,7 +117,6 @@ namespace FilmStudioSFF.Controllers
                 return BadRequest("Ogiltig filmkopia.");
             }
 
-            // Kontrollera om filmkopian finns i systemet och inte redan är uthyrd
             var film = _filmService.GetFilmById(filmCopy.FilmCopyId);
             if (film == null)
             {
@@ -125,7 +124,7 @@ namespace FilmStudioSFF.Controllers
                 return NotFound("Filmen kunde inte hittas.");
             }
 
-            var filmCopyToRent = film.FilmCopies.FirstOrDefault(fc => fc.FilmCopyId == filmCopy.FilmCopyId);
+            var filmCopyToRent = film.FilmCopies?.FirstOrDefault(fc => fc.FilmCopyId == filmCopy.FilmCopyId);
             if (filmCopyToRent == null)
             {
                 Console.WriteLine($"Film copy with ID {filmCopy.FilmCopyId} not found.");
@@ -138,7 +137,6 @@ namespace FilmStudioSFF.Controllers
                 return BadRequest("Filmkopian är redan uthyrd.");
             }
 
-            // Kontrollera om filmstudion existerar
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
             var isAdmin = userRole == "admin";
             var studio = _filmStudioService.GetFilmStudioById(studioId, userRole, isAdmin);
@@ -148,12 +146,13 @@ namespace FilmStudioSFF.Controllers
                 return NotFound($"Filmstudio med ID {studioId} hittades inte.");
             }
 
-            // Om allting är korrekt, markera filmen som uthyrd
             filmCopyToRent.IsRented = true;
             Console.WriteLine($"Film copy {filmCopy.FilmCopyId} rented successfully to studio {studioId}");
 
             return Ok($"Filmkopian hyrdes ut till filmstudio med ID {studioId}.");
         }
+
+
 
         //POST: api/filmstudio/return
         //save to test
