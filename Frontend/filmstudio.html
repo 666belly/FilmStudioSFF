@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Film Studio Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Film Studio Dashboard</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html" onclick="logout()">Logout</a></li>
+            </ul>
+        </nav>
+
+        <!-- Section to fetch and display rented films -->
+        <section>
+            <h2>Rented Films</h2>
+            <button id="fetchRentedFilmsButton">Fetch Rented Films</button>
+            <div id="rentedFilmsList"></div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

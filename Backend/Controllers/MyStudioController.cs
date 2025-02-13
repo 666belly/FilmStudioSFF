@@ -25,6 +25,7 @@ namespace FilmStudioSFF.Controllers
         // GET: api/mystudio/rentals
         // 404 not found?? Inga uthyrda filmer.??? varför
         [HttpGet("rentals")]
+        [Authorize(Roles = "filmstudio")]
         public ActionResult<IEnumerable<FilmCopy>> GetRentalsForStudio()
         {
             var studioId = GetAuthenticatedStudioId();

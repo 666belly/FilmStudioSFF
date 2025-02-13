@@ -26,45 +26,37 @@ namespace FilmStudioSFF.Controllers
         //POST register new filmstudio
         //api/filmstudio/register
         // DONE - works
+
         [HttpPost("register")]
-        public IActionResult RegisterFilmStudio([FromBody] FilmStudio filmStudio)
+        public ActionResult<IRegisterFilmStudio> Register([FromBody] FilmStudio filmStudio)
         {
             if (filmStudio == null)
             {
-                return BadRequest("Ogiltig input");
+                return BadRequest("Film studio data is required.");
             }
 
-            var newStudio = _filmStudioService.RegisterFilmStudio(filmStudio);
-            if (newStudio == null)
-            {
-                return Conflict ("Filmstudion finns redan");
-            }
+            var registeredFilmStudio = _filmStudioService.RegisterFilmStudio(filmStudio);
 
-            return Ok(newStudio);
+            return Ok(registeredFilmStudio);
         }
 
-        //POST login filmstudio
-        //api/filmstudio/login
-        // DONE - works
+
         [HttpPost("login")]
-        public IActionResult LoginFilmStudio([FromBody] FilmStudioLogin loginModel)
+        public ActionResult<FilmStudioLoginResponse> LoginFilmStudio([FromBody] FilmStudioLogin loginModel)
         {
             if (loginModel == null)
             {
-                return BadRequest("Ogiltig input");
+                return BadRequest("Login data is required.");
             }
 
-            var studio = _filmStudioService.FilmStudioLogin(loginModel.Username, loginModel.Password);
-            if (studio == null)
+            var studioLoginResponse = _filmStudioService.FilmStudioLogin(loginModel.Username, loginModel.Password);
+            if (studioLoginResponse == null)
             {
-                return Unauthorized("Felaktigt användarnamn eller lösenord");
+                return Unauthorized("Invalid username or password.");
             }
 
-            var token = _authService.GenerateJwtToken(studio.Username, studio.Role, studio.FilmStudioId);
-            
-            return Ok(new { filmStudio = studio, token });
+            return Ok(studioLoginResponse);
         }
-
 
         //GET specific filmstudio based on id
         //api/filmstudio/id
@@ -85,13 +77,12 @@ namespace FilmStudioSFF.Controllers
         //api/filmstudio
         // DONE - works
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "admin")]
         public IActionResult GetAllFilmStudios()
         {
-            //check if user is admin
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            bool includeFullDetails = userRole == "admin"; // if admin include full details
+            bool includeFullDetails = userRole == "admin"; 
 
             var studios = _filmStudioService.GetAllFilmStudios(userRole, includeFullDetails);
 
@@ -102,19 +93,22 @@ namespace FilmStudioSFF.Controllers
         // api/filmstudio/{studioId}/rented-films
         // 200 ok but doesnt fetch list corretly??? 
         [HttpGet("{studioId}/rented-films")]
-        [Authorize(Roles = "filmstudio")]
+        //[Authorize(Roles = "filmstudio")]
         public IActionResult GetRentedFilms(int studioId)
         {
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-            bool includeFullDetails = userRole == "admin"; 
-            var studio = _filmStudioService.GetFilmStudioById(studioId, userRole, includeFullDetails);
-            if (studio == null)
+            bool includeFullDetails = userRole == "admin";
+
+            var rentedFilms = _filmStudioService.GetRentedFilms(studioId);
+
+            if (rentedFilms == null || !rentedFilms.Any())
             {
-                return NotFound($"Filmstudion med ID {studioId} hittades inte");
+                return NotFound($"No rented films found for studio ID {studioId}");
             }
 
-            return Ok(studio.RentedFilms ?? new List<FilmCopy>());
+            return Ok(rentedFilms);
         }
+
 
     }
 }
