@@ -1,9 +1,8 @@
-using System.Collections.Generic;
 using FilmStudioSFF.Models;
-using FilmStudioSFF.Controllers;
-using System.Linq;
 using FilmStudioSFF.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FilmStudioSFF.Services
 {
@@ -15,7 +14,6 @@ namespace FilmStudioSFF.Services
         public FilmService(FilmStudioDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-
             _mockFilms = GetMockFilms().ToList();
         }
 
@@ -24,7 +22,6 @@ namespace FilmStudioSFF.Services
             var films = _context.Films.Include(f => f.FilmCopies).ToList();
             var mockFilms = GetMockFilms();
 
-            // Ensure mockFilms is not null before using Concat
             if (mockFilms == null)
             {
                 return films;
@@ -62,7 +59,6 @@ namespace FilmStudioSFF.Services
             };
         }
 
-        // Add new film (to the database)
         public Film AddFilm(Film newFilm)
         {
             if (newFilm == null)
@@ -70,16 +66,12 @@ namespace FilmStudioSFF.Services
                 throw new ArgumentNullException(nameof(newFilm), "Film data is required.");
             }
 
-            // Lägg till filmen i databasen
             _context.Films.Add(newFilm);
-            _context.SaveChanges(); // Spara ändringarna i databasen
+            _context.SaveChanges();
 
             return newFilm;
         }
 
-
-
-        // Get the next available FilmId (based on existing database records)
         public int GetNewFilmId()
         {
             var existingFilmIds = _context.Films.Select(f => f.FilmId).ToList();
@@ -94,17 +86,6 @@ namespace FilmStudioSFF.Services
             return newFilmId;
         }
 
-
-        // Get all films (now from the database only)
-        // public List<Film> GetAllFilms()
-        // {
-        //     var filmsFromDb = _context.Films.Include(f => f.FilmCopies).ToList();
-        //     var allFilms = filmsFromDb.Concat(_mockFilms).ToList();
-
-        //     return allFilms;
-        // }
-
-        // Get a specific film by its ID (from the database)
         public Film GetFilmById(int id)
         {
             var filmFromDb = _context.Films.FirstOrDefault(f => f.FilmId == id);
@@ -118,7 +99,6 @@ namespace FilmStudioSFF.Services
             return filmFromDb;
         }
 
-        // Update an existing film in the database
         public void UpdateFilm(Film updatedFilm)
         {
             var existingFilm = _context.Films.FirstOrDefault(f => f.FilmId == updatedFilm.FilmId);
@@ -132,19 +112,18 @@ namespace FilmStudioSFF.Services
                 existingFilm.Year = updatedFilm.Year;
                 existingFilm.IsAvailable = updatedFilm.IsAvailable;
 
-                _context.SaveChanges(); // Save the updated film in the database
+                _context.SaveChanges();
             }
         }
 
-        // Delete a film from the database
         public void DeleteFilm(int id)
         {
             var film = _context.Films.FirstOrDefault(f => f.FilmId == id);
 
             if (film != null)
             {
-                _context.Films.Remove(film);  // Remove the film from the database
-                _context.SaveChanges();       // Save changes to persist the deletion
+                _context.Films.Remove(film);
+                _context.SaveChanges();
             }
         }
     }

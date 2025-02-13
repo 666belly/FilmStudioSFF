@@ -28,7 +28,7 @@ namespace FilmStudioSFF.Controllers
         // DONE - works
 
         [HttpPost("register")]
-        public ActionResult<FilmStudioDTO> Register([FromBody] FilmStudio filmStudio)
+        public ActionResult<IRegisterFilmStudio> Register([FromBody] FilmStudio filmStudio)
         {
             if (filmStudio == null)
             {
@@ -39,6 +39,7 @@ namespace FilmStudioSFF.Controllers
 
             return Ok(registeredFilmStudio);
         }
+
 
         [HttpPost("login")]
         public ActionResult<FilmStudioLoginResponse> LoginFilmStudio([FromBody] FilmStudioLogin loginModel)

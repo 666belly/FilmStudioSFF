@@ -126,8 +126,8 @@ namespace FilmStudioSFF.Services
         }
 
 
-        // Registrera en ny filmstudio
-         public FilmStudioDTO RegisterFilmStudio(FilmStudio filmStudio)
+        // Register new filmstuido
+        public IRegisterFilmStudio RegisterFilmStudio(FilmStudio filmStudio)
         {
             // Hash the password before saving
             filmStudio.Password = BCrypt.Net.BCrypt.HashPassword(filmStudio.Password);
@@ -135,16 +135,15 @@ namespace FilmStudioSFF.Services
             _context.FilmStudios.Add(filmStudio);
             _context.SaveChanges();
 
-            var filmStudioDTO = new FilmStudioDTO
+            var filmStudioRegisterDTO = new FilmStudioRegisterDTO
             {
                 Username = filmStudio.Username,
                 Name = filmStudio.Name,
-                City = filmStudio.City,
                 Email = filmStudio.Email,
                 Role = filmStudio.Role
             };
 
-            return filmStudioDTO;
+            return filmStudioRegisterDTO;
         }
 
         public FilmStudioLoginResponse? FilmStudioLogin(string username, string password)
@@ -155,6 +154,7 @@ namespace FilmStudioSFF.Services
                 var token = _authenticationService.GenerateJwtToken(studio.Username, studio.Role, studio.FilmStudioId);
                 return new FilmStudioLoginResponse
                 {
+                    FilmStudioId = studio.FilmStudioId,
                     Username = studio.Username,
                     Name = studio.Name,
                     City = studio.City,
@@ -165,6 +165,7 @@ namespace FilmStudioSFF.Services
             }
             return null;
         }
+
 
         public FilmStudioDTO? GetFilmStudioById(int id, string? userRole, bool includeFullDetails)
         {
@@ -255,10 +256,10 @@ namespace FilmStudioSFF.Services
 
 
 
-    public FilmCopy? GetFilmCopyById(int filmCopyId)
-    {
-        return _context.FilmCopies.FirstOrDefault(fc => fc.FilmCopyId == filmCopyId);
-    }
+        public FilmCopy? GetFilmCopyById(int filmCopyId)
+        {
+            return _context.FilmCopies.FirstOrDefault(fc => fc.FilmCopyId == filmCopyId);
+        }
 
 
 
