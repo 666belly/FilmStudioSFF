@@ -77,8 +77,7 @@ dotnet run
 Open your browser and navigate to:
 
 Copy
-http://localhost:5000
-
+http://localhost:5145
 
 ### Running the Application
 ## Backend
