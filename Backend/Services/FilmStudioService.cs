@@ -287,6 +287,14 @@ namespace FilmStudioSFF.Services
                 return true;
             }
 
+
+            public IEnumerable<FilmCopy> GetRentalsForStudio(int studioId)
+            {
+                return _context.FilmCopies
+                    .Include(fc => fc.Film)
+                    .Where(fc => fc.FilmStudioId == studioId && fc.IsRented)
+                    .ToList();
+            }
             internal object GetAllFilmCopies()
             {
                 throw new NotImplementedException();

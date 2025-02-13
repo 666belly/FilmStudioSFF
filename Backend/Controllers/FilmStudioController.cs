@@ -77,13 +77,12 @@ namespace FilmStudioSFF.Controllers
         //api/filmstudio
         // DONE - works
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "admin")]
         public IActionResult GetAllFilmStudios()
         {
-            //check if user is admin
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            bool includeFullDetails = userRole == "admin"; // if admin include full details
+            bool includeFullDetails = userRole == "admin"; 
 
             var studios = _filmStudioService.GetAllFilmStudios(userRole, includeFullDetails);
 
