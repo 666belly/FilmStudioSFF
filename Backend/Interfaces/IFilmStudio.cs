@@ -6,6 +6,8 @@ public interface IFilmStudio
     int FilmStudioId { get; set; }
     string Name { get; set; }   
     string City { get; set; }   
+    string Role { get; set; }
+    string Password { get; set; }
     public string Username { get; set; }
-    List<FilmCopy> RentedFilms { get; set; }
+    List<FilmCopy> FilmCopies { get; set; } 
 }

@@ -15,51 +15,51 @@ namespace FilmStudioSFF.Services
         public FilmService(FilmStudioDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-            
-            // Mock data (exempel på mockfilmer)
-            _mockFilms = new List<Film>
+
+            _mockFilms = GetMockFilms().ToList();
+        }
+
+        public IEnumerable<Film> GetAllFilms()
+        {
+            var films = _context.Films.Include(f => f.FilmCopies).ToList();
+            var mockFilms = GetMockFilms();
+
+            // Ensure mockFilms is not null before using Concat
+            if (mockFilms == null)
+            {
+                return films;
+            }
+
+            return films.Concat(mockFilms);
+        }
+
+        private IEnumerable<Film> GetMockFilms()
+        {
+            return new List<Film>
             {
                 new Film
                 {
-                    FilmId = 2, 
-                    Title = "Mock Film 2", 
-                    Director = "Alan", 
-                    Description = "Aionaogbn", 
-                    Genre = "Comedy", 
+                    FilmId = 1,
+                    Title = "Mock Film 1",
+                    Director = "Alan",
+                    Description = "Aionaogbn",
+                    Genre = "Comedy",
                     Year = 2021,
-                    IsAvailable = true, // Här är filmen tillgänglig
-                    FilmCopies = new List<FilmCopy>
-                    {
-                        new FilmCopy
-                        {
-                            FilmCopyId = 2, 
-                            IsRented = false, // Filmkopian är inte uthyrd
-                            Title = "string"
-                        }
-                    }
- 
+                    IsAvailable = true,
+                    FilmCopies = new List<FilmCopy>()
                 },
                 new Film
                 {
-                    FilmId = 1, 
-                    Title = "Mock Film 2", 
-                    Director = "Alan", 
-                    Description = "Aionaogbn", 
-                    Genre = "Comedy", 
+                    FilmId = 2,
+                    Title = "Mock Film 2",
+                    Director = "Alan",
+                    Description = "Aionaogbn",
+                    Genre = "Comedy",
                     Year = 2021,
-                    IsAvailable = true, // Här är filmen tillgänglig
-                    FilmCopies = new List<FilmCopy>
-                    {
-                        new FilmCopy
-                        {
-                            FilmCopyId = 1, 
-                            IsRented = false, // Filmkopian är inte uthyrd
-                            Title = "string"
-                        }
-                    }
+                    IsAvailable = true,
+                    FilmCopies = new List<FilmCopy>()
                 }
             };
-
         }
 
         // Add new film (to the database)
@@ -70,25 +70,20 @@ namespace FilmStudioSFF.Services
                 throw new ArgumentNullException(nameof(newFilm), "Film data is required.");
             }
 
-            // Ensure a new unique FilmId is set if it's not already provided
-            if (newFilm.FilmId == 0)
-            {
-                newFilm.FilmId = GetNewFilmId();
-            }
-
-            // Add new film to the database
+            // Lägg till filmen i databasen
             _context.Films.Add(newFilm);
-            _context.SaveChanges(); // Save changes to the database
+            _context.SaveChanges(); // Spara ändringarna i databasen
 
             return newFilm;
         }
+
+
 
         // Get the next available FilmId (based on existing database records)
         public int GetNewFilmId()
         {
             var existingFilmIds = _context.Films.Select(f => f.FilmId).ToList();
             var mockFilmIds = _mockFilms.Select(f => f.FilmId).ToList();
-
             var allFilmIds = existingFilmIds.Concat(mockFilmIds).ToList();
 
             int newFilmId = 1; 
@@ -96,25 +91,18 @@ namespace FilmStudioSFF.Services
             {
                 newFilmId++;
             }
-
             return newFilmId;
         }
 
+
         // Get all films (now from the database only)
-        public List<Film> GetAllFilms()
-        {
-            // Fetch films from the real database
-            var filmsFromDb = _context.Films.Include(f => f.FilmCopies).ToList();
+        // public List<Film> GetAllFilms()
+        // {
+        //     var filmsFromDb = _context.Films.Include(f => f.FilmCopies).ToList();
+        //     var allFilms = filmsFromDb.Concat(_mockFilms).ToList();
 
-            // Combine films from the database and the mock database
-            var allFilms = filmsFromDb.Concat(_mockFilms).ToList();
-
-            return allFilms;
-            // // Hämta alla filmer direkt från databasen
-            // var filmsFromDb = _context.Films.Include(f => f.FilmCopies).ToList();
-
-            // return filmsFromDb;
-        }
+        //     return allFilms;
+        // }
 
         // Get a specific film by its ID (from the database)
         public Film GetFilmById(int id)

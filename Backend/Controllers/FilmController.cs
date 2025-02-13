@@ -56,103 +56,94 @@ namespace FilmStudioSFF.Controllers
         // POST: api/films
         //DONE - works, films are added to the list
         [HttpPost]
-        public ActionResult<Film> AddFilm([FromBody] Film newFilm)
+        //[Authorize(Roles = "Admin")] // Säkerställ att endast administratörer kan anropa denna metod
+        public ActionResult<IFilm> AddFilm([FromBody] ICreateFilm createFilm)
         {
-            Console.WriteLine($"Received: {JsonSerializer.Serialize(newFilm)}");
-
-            if (newFilm == null)
+            if (createFilm == null)
             {
                 return BadRequest("Film data is required.");
             }
 
+            // Skapa en ny film baserat på input
+            var newFilm = new Film
+            {
+                FilmId = createFilm.FilmId == 0 ? _filmService.GetNewFilmId() : createFilm.FilmId,
+                Title = createFilm.Title,
+                Description = createFilm.Description,
+                Genre = createFilm.Genre,
+                Director = createFilm.Director,
+                Year = createFilm.Year,
+                IsAvailable = createFilm.IsAvailable,
+                FilmCopies = new List<FilmCopy>()
+            };
+
+            // Skapa filmkopior baserat på AvailableCopies
+            for (int i = 0; i < createFilm.AvailableCopies; i++)
+            {
+                newFilm.FilmCopies.Add(new FilmCopy
+                {
+                    Title = newFilm.Title + $" (Copy {i + 1})",
+                    IsRented = false,
+                    Film = newFilm,
+                    FilmStudio = null // Set this to the appropriate FilmStudio object if available
+                });
+            }
+
             var addedFilm = _filmService.AddFilm(newFilm);
-            return CreatedAtAction(nameof(GetAllFilms), new { id = addedFilm.FilmId }, addedFilm);
+
+            return Ok(addedFilm); // Statuskod 200 och returnerar ett JSON-objekt av typen IFilm
         }
+
 
         //DELETE: api/film/id
         //Returns 204nocontent but does not remove the film from the list
-        [HttpDelete("{id}")]
-        public ActionResult DeleteFilm(int id)
-        {
-            var film = _filmService.GetFilmById(id);
-            if (film == null)
-            {
-                return NotFound(); //returnstatus 404notfound
-            }
+        // [HttpDelete("{id}")]
+        // public ActionResult DeleteFilm(int id)
+        // {
+        //     var film = _filmService.GetFilmById(id);
+        //     if (film == null)
+        //     {
+        //         return NotFound(); //returnstatus 404notfound
+        //     }
 
-            _filmService.DeleteFilm(id);
-            return NoContent(); //returnstatus 204nocontent
-        }
+        //     _filmService.DeleteFilm(id);
+        //     return NoContent(); //returnstatus 204nocontent
+        // }
 
 
         //PATCH: api/film/id
-        [HttpPatch("{id}")]
-        [Authorize(Roles = "Admin")]
-        public IActionResult UpdateFilm(int id, [FromBody] Film updatedFilm)
-        {
-            if (updatedFilm == null || id != updatedFilm.FilmId)
-            {
-                return BadRequest("Ogiltiga uppgifter.");
-            }
+        // [HttpPatch("{id}")]
+        // [Authorize(Roles = "Admin")]
+        // public IActionResult UpdateFilm(int id, [FromBody] Film updatedFilm)
+        // {
+        //     if (updatedFilm == null || id != updatedFilm.FilmId)
+        //     {
+        //         return BadRequest("Ogiltiga uppgifter.");
+        //     }
 
-            var existingFilm = _filmService.GetFilmById(id);
-            if (existingFilm == null)
-            {
-                return NotFound($"Filmen med ID {id} hittades inte.");
-            }
+        //     var existingFilm = _filmService.GetFilmById(id);
+        //     if (existingFilm == null)
+        //     {
+        //         return NotFound($"Filmen med ID {id} hittades inte.");
+        //     }
 
-            return Ok(updatedFilm);
-        }
+        //     return Ok(updatedFilm);
+        // }
 
         //POST: api/filmstudio/{studioId}/rent
-        //working i guess?
-        [HttpPost("{studioId}/rent")]
-        public IActionResult RentFilmToStudio(int studioId, [FromBody] FilmCopy filmCopy)
+    [Authorize(Roles = "filmstudio")]
+    [HttpPost("rent")]
+    public IActionResult RentFilmToStudio(int filmId, int studioId)
+    {
+        var user = HttpContext.User; // Hämtar den autentiserade användaren
+        bool success = _filmStudioService.RentFilmToStudio(filmId, studioId);
+
+        if (!success)
         {
-            Console.WriteLine($"Received rent request for studio ID: {studioId} and FilmCopy ID: {filmCopy.FilmCopyId}");
-            
-            if (filmCopy == null)
-            {
-                Console.WriteLine("Film copy is null.");
-                return BadRequest("Ogiltig filmkopia.");
-            }
-
-            var film = _filmService.GetFilmById(filmCopy.FilmCopyId);
-            if (film == null)
-            {
-                Console.WriteLine($"Film with ID {filmCopy.FilmCopyId} not found.");
-                return NotFound("Filmen kunde inte hittas.");
-            }
-
-            var filmCopyToRent = film.FilmCopies?.FirstOrDefault(fc => fc.FilmCopyId == filmCopy.FilmCopyId);
-            if (filmCopyToRent == null)
-            {
-                Console.WriteLine($"Film copy with ID {filmCopy.FilmCopyId} not found.");
-                return NotFound($"Filmkopia med ID {filmCopy.FilmCopyId} hittades inte.");
-            }
-
-            if (filmCopyToRent.IsRented)
-            {
-                Console.WriteLine($"Film copy {filmCopy.FilmCopyId} is already rented.");
-                return BadRequest("Filmkopian är redan uthyrd.");
-            }
-
-            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-            var isAdmin = userRole == "admin";
-            var studio = _filmStudioService.GetFilmStudioById(studioId, userRole, isAdmin);
-            if (studio == null)
-            {
-                Console.WriteLine($"Studio with ID {studioId} not found.");
-                return NotFound($"Filmstudio med ID {studioId} hittades inte.");
-            }
-
-            filmCopyToRent.IsRented = true;
-            Console.WriteLine($"Film copy {filmCopy.FilmCopyId} rented successfully to studio {studioId}");
-
-            return Ok($"Filmkopian hyrdes ut till filmstudio med ID {studioId}.");
+            return StatusCode(409, "Kunde inte hyra filmen."); // Generell felhantering, kan förbättras
         }
-
-
+        return Ok("Film uthyrd framgångsrikt.");
+    }
 
         //POST: api/filmstudio/return
         //save to test

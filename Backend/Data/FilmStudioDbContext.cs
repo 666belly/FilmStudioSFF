@@ -1,5 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using FilmStudioSFF.Models;
+using FilmStudioSFF.Data;
+using FilmStudioSFF.Controllers;
+using FilmStudioSFF.Services;
+using FilmStudioSFF.Interfaces;
+
 
 namespace FilmStudioSFF.Data
 {
@@ -13,19 +18,40 @@ namespace FilmStudioSFF.Data
         public DbSet<FilmCopy> FilmCopies { get; set; }
         public DbSet<Rental> Rentals { get; set; }
         public DbSet<Film> Films { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configure relationships
+
+            // Film -> FilmCopy (One-to-Many)
+            modelBuilder.Entity<Film>()
+                .HasMany(f => f.FilmCopies)
+                .WithOne(fc => fc.Film)
+                .HasForeignKey(fc => fc.FilmId);
+
+            // FilmStudio -> FilmCopy (One-to-Many)
+            modelBuilder.Entity<FilmStudio>()
+                .HasMany(fs => fs.RentedFilms)
+                .WithOne(fc => fc.FilmStudio)
+                .HasForeignKey(fc => fc.FilmStudioId);
+
+            // Rental -> FilmCopy (Many-to-One)
+            modelBuilder.Entity<Rental>()
+                .HasOne(r => r.FilmCopy)
+                .WithMany()
+                .HasForeignKey(r => r.FilmCopyId);
+
+            // Rental -> FilmStudio (Many-to-One)
+            modelBuilder.Entity<Rental>()
+                .HasOne(r => r.FilmStudio)
+                .WithMany()
+                .HasForeignKey(r => r.StudioId);
+
+            // Composite key for Rental
+            modelBuilder.Entity<Rental>()
+                .HasKey(r => new { r.FilmCopyId, r.StudioId });
+        }
     }
-
-    public class Rental
-    {
-        public int RentalId { get; set; }
-        public int FilmCopyId { get; set; }
-        public int StudioId { get; set; }
-        public DateTime RentalDate { get; set; }
-        public DateTime? ReturnDate { get; set; }
-
-        // Navigation properties
-        public FilmCopy FilmCopy { get; set; }
-        public FilmStudio FilmStudio { get; set; }
-    }
-
 }
