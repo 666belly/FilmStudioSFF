@@ -56,24 +56,17 @@
    git clone https://github.com/666belly/FilmStudioSFF.git
    cd FilmStudioSFF
 
-2. **Restore Dependencies** :
-Open the project in Visual Studio or VS Code and restore the dependencies:
-
-bash
-Copy
-dotnet restore
-
-3. **Set Up the Database**:
+2. **Set Up the Database**:
 The project uses an in-memory database, so no additional setup is required for the database.
 
-4. *Run the Application*:
+3. *Run the Application*:
 Start the application using the following command:
 
-bash
-Copy
-dotnet run
+   ```bash
+    Copy
+    dotnet run
 
-5. *Access the Application*:
+4. *Access the Application*:
 Open your browser and navigate to:
 
 Copy
