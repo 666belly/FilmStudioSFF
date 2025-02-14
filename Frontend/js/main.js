@@ -6,10 +6,15 @@ import { logout } from './modules/utility.js';
 const apiBaseUrl = 'http://localhost:5145/api';
 
 document.addEventListener('DOMContentLoaded', () => {
+    const isHomePage = window.location.pathname.includes('index.html');
     const isAdminPage = window.location.pathname.includes('admin.html');
     const isFilmStudioPage = window.location.pathname.includes('filmstudio.html');
     const isRegisterPage = window.location.pathname.includes('register.html');
     const isLoginPage = window.location.pathname.includes('login.html');
+
+    if (isHomePage) {
+        fetchAllFilmsAdmin(apiBaseUrl);
+    }
 
     if (isRegisterPage) {
         registerUser(apiBaseUrl);
@@ -31,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.editFilm = editFilm;
         window.deleteFilm = (filmCopyId) => {
-            console.log(`Deleting film with ID: ${filmCopyId}`); // Debugging
+            console.log(`Deleting film with ID: ${filmCopyId}`); 
             deleteFilm(apiBaseUrl, filmCopyId);
         };
 

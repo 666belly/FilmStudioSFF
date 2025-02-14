@@ -12,7 +12,7 @@ namespace FilmStudioSFF.Models
         public required string City { get; set; }
         public required string Password { get; set; }
 
-        // Navigation property for RentedFilms
+        // Relationship property for RentedFilms
         public List<FilmCopy> RentedFilms { get; set; } = new List<FilmCopy>(); 
         public List<FilmCopy> FilmCopies { get; set; } = new List<FilmCopy>();
     }

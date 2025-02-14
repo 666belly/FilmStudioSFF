@@ -2,8 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using FilmStudioSFF.Services;
 using FilmStudioSFF.Models;
 using Microsoft.AspNetCore.Authorization;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 
 namespace FilmStudioSFF.Controllers
