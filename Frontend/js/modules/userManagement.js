@@ -81,7 +81,7 @@ export function loginUser(apiBaseUrl) {
                 if (data.role === 'admin') {
                     window.location.href = 'admin.html';
                 } else if (data.role === 'filmstudio') {
-                    localStorage.setItem('studioId', data.studioId); // Store the studioId
+                    localStorage.setItem('studioId', data.studioId); 
                     console.log(`Logged in as film studio with studioId: ${data.studioId}`);
                     window.location.href = 'filmstudio.html';
                 }
