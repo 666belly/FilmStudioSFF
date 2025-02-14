@@ -173,7 +173,6 @@ export function fetchAllFilms(apiBaseUrl) {
                 }
             });
 
-            // Add event listeners for delete buttons
             document.querySelectorAll('.delete-film-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const filmCopyId = event.target.getAttribute('data-film-id');
