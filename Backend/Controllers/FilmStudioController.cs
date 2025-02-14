@@ -93,7 +93,6 @@ namespace FilmStudioSFF.Controllers
 
         // GET rented film copies for a specific film studio
         // api/filmstudio/{studioId}/rented-films
-        // 200 ok but doesnt fetch list corretly??? 
         [HttpGet("{studioId}/rented-films")]
         [Authorize(Roles = "filmstudio")]
         public IActionResult GetRentedFilms(int studioId)
