@@ -23,6 +23,7 @@ namespace FilmStudioSFF.Controllers
 
         // GET: api/film
         //DONE WORKS
+        //both for unauthorized, admin and filmstudio to access
         [HttpGet]
         public ActionResult<IEnumerable<Film>> GetAllFilms()
         {

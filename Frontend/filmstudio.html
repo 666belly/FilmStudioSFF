@@ -10,19 +10,33 @@
     <div class="container">
         <h1>Film Studio Dashboard</h1>
         <nav>
-            <ul>
-                <li><a href="index.html" onclick="logout()">Logout</a></li>
-            </ul>
+            <button id="logoutButton">Logout</button>
         </nav>
-
-        <!-- Section to fetch and display rented films -->
+        
+        <!-- Section to display rented films -->
         <section>
             <h2>Rented Films</h2>
-            <button id="fetchRentedFilmsButton">Fetch Rented Films</button>
-            <div id="rentedFilmsList"></div>
+            <div id="rentedFilmsList" class="filmList"></div>
+        </section>
+
+        <!-- Section to display all films -->
+        <section>
+            <h2>All Films</h2>
+            <div id="allFilmsList" class="filmList"></div>
+        </section>
+
+        <!-- Section to return a film -->
+        <section>
+            <h2>Return a Film</h2>
+            <form id="returnFilmForm">
+                <label for="filmCopyId">Film Copy ID:</label>
+                <input type="number" id="filmCopyId" name="filmCopyId" required>
+                <button type="submit">Return</button>
+            </form>
+            <div id="returnFilmMessage"></div>
         </section>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

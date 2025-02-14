@@ -10,7 +10,7 @@
     <div class="container">
         <h1>Admin Dashboard</h1>
         <nav>
-            <button onclick="logout()">Logout</button>
+            <button id="logoutButton">Logout</button>
         </nav>
         
         <!-- Collapsible form to add a new film -->
@@ -53,6 +53,16 @@
             <div id="userDetails"></div>
         </section>
 
+        <!-- Section to manage film studios -->
+        <section>
+            <h2>Manage Film Studios</h2>
+            <button id="getAllFilmStudiosButton">Get All Film Studios</button>
+            <input type="number" id="filmStudioIdInput" placeholder="Enter Film Studio ID">
+            <button id="getFilmStudioButton">Get Film Studio</button>
+            <div id="filmStudioList"></div>
+            <div id="filmStudioDetails"></div>
+        </section>
+
         <!-- Section to display all films -->
         <section>
             <h2>All Films</h2>
@@ -60,6 +70,6 @@
         </section>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using FilmStudioSFF.Models;
 using FilmStudioSFF.Interfaces;
 using System.Linq;
-using BCrypt.Net; // Importera BCrypt.Net för lösenordshashning
+using BCrypt.Net;
 using System;
 using Microsoft.AspNetCore.Mvc;
 
@@ -49,47 +49,22 @@ namespace FilmStudioSFF.Services
 
 
         // Authenticate user
-        public UserRegister? AuthenticateUser(IUserAuthenticate loginRequest)
+        public UserRegister AuthenticateUser(UserAuthenticate loginRequest)
         {
-            // Logga antalet användare innan autentisering
-            Console.WriteLine($"Total users before authentication: {_users.Count}");
-
-            // Logga alla användare i systemet innan inloggning
-            Console.WriteLine("All users in the system (before login attempt):");
-            foreach (var user in _users)
+            var user = _users.FirstOrDefault(u => u.Username == loginRequest.Username);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, user.Password))
             {
-                Console.WriteLine($"User: {user.Username}, Password Hash: {user.Password}");
+                return null;
             }
-
-            Console.WriteLine($"Attempting to log in with Username: {loginRequest.Username}");
-
-            var existingUser = _users.FirstOrDefault(u => string.Equals(u.Username, loginRequest.Username, StringComparison.OrdinalIgnoreCase));
-            
-            if (existingUser == null)
-            {
-                Console.WriteLine($"No user found with username: {loginRequest.Username}");
-                return null; // Användaren hittades inte
-            }
-
-            if (!BCrypt.Net.BCrypt.Verify(loginRequest.Password, existingUser.Password))
-            {
-                Console.WriteLine($"Password mismatch for user: {loginRequest.Username}");
-                return null; // Lösenordet stämmer inte
-            }
-
-            // Logga antalet användare efter autentisering
-            Console.WriteLine($"Total users after authentication: {_users.Count}");
-
-            Console.WriteLine($"User {loginRequest.Username} authenticated successfully.");
-            return existingUser;
+            return user;
         }
 
         // Get user by ID
         public UserRegister GetUserById(int id)
         {
-            return _users.FirstOrDefault(u => u.UserId == id)!;
+            return _users.FirstOrDefault(u => u.UserId == id);
+            
         }
-
         // Get all users
         public List<UserRegister> GetAllUsers()
         {
@@ -99,7 +74,7 @@ namespace FilmStudioSFF.Services
         // Hash password using BCrypt
         public string HashPassword(string password)
         {
-            return BCrypt.Net.BCrypt.HashPassword(password); // Hash the password using BCrypt
+            return BCrypt.Net.BCrypt.HashPassword(password); 
         }
     }
 }
