@@ -12,28 +12,28 @@
         <nav>
             <button id="logoutButton">Logout</button>
         </nav>
-        
+
         <!-- Section to display rented films -->
         <section>
             <h2>Rented Films</h2>
             <div id="rentedFilmsList" class="filmList"></div>
         </section>
 
+        <!-- Section to rent a film -->
+        <section>
+            <h2>Rent a Film</h2>
+            <form id="rentFilmForm">
+                <label for="filmId">Film ID:</label>
+                <input type="number" id="filmId" name="filmId" required>
+                <button type="submit">Rent Film</button>
+            </form>
+            <div id="rentFilmMessage"></div>
+        </section>
+
         <!-- Section to display all films -->
         <section>
             <h2>All Films</h2>
-            <div id="allFilmsList" class="filmList"></div>
-        </section>
-
-        <!-- Section to return a film -->
-        <section>
-            <h2>Return a Film</h2>
-            <form id="returnFilmForm">
-                <label for="filmCopyId">Film Copy ID:</label>
-                <input type="number" id="filmCopyId" name="filmCopyId" required>
-                <button type="submit">Return</button>
-            </form>
-            <div id="returnFilmMessage"></div>
+            <div id="filmList" class="filmList"></div>
         </section>
     </div>
 
