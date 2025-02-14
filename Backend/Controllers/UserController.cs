@@ -44,7 +44,6 @@ namespace FilmStudioSFF.Controllers
 
         //POST api/user/login
         // DONE - works
-
         [HttpPost("authenticate")]
         public ActionResult Authenticate([FromBody] UserAuthenticate loginRequest)
         {
@@ -57,25 +56,11 @@ namespace FilmStudioSFF.Controllers
             var token = _authService.GenerateJwtToken(user.Username, user.Role, user.UserId);
             return Ok(new { token, role = user.Role });
         }
-        // [HttpPost("authenticate")]
-        // public ActionResult<string> Authenticate([FromBody] UserAuthenticate loginRequest)
-        // {
-        //     var user = _userService.AuthenticateUser(loginRequest);
-        //     if (user is null)
-        //     {
-        //         // Lägg till mer detaljerad loggning
-        //         Console.WriteLine($"Invalid login attempt for username: {loginRequest.Username}");
-        //         return Unauthorized("Invalid username or password.");
-        //     }
-
-        //     var token = _authService.GenerateJwtToken(user.Username, user.Role, user.UserId);
-        //     return Ok(new { Token = token });
-        // }
 
         //GET: api/user/id (get one user, admin can get all)
         // 401 unauth Invalid user ID, auth doesnt work?
         [HttpGet("{id}")]
-        [Authorize]
+        [Authorize(Roles = "admin")]
         public ActionResult<UserRegister> GetUser(int id)
         {
             var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;

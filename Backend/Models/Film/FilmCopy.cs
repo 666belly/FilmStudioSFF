@@ -26,6 +26,6 @@ namespace FilmStudioSFF.Models
         public required Film Film { get; set; }
         public int FilmId { get; set; }
         public int? FilmStudioId { get; set; }
-        public FilmStudio FilmStudio { get; set; }
+        public FilmStudio? FilmStudio { get; set; }
     }
 }
