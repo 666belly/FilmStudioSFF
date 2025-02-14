@@ -22,6 +22,7 @@ namespace FilmStudioSFF.Controllers
         }
 
         // GET: api/film
+        //DONE WORKS
         [HttpGet]
         public ActionResult<IEnumerable<Film>> GetAllFilms()
         {
@@ -35,6 +36,7 @@ namespace FilmStudioSFF.Controllers
         }
 
         // GET: api/film/{id}
+        //DONE WORKS
         [HttpGet("{id}")]
         public ActionResult<Film> GetFilmById(int id)
         {
@@ -48,8 +50,9 @@ namespace FilmStudioSFF.Controllers
         }
 
         // POST: api/films
+        //DONE WORKS
         [HttpPost]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "admin")]
         public ActionResult<IFilm> AddFilm([FromBody] CreateFilm createFilm)
         {
             if (createFilm == null)
@@ -75,8 +78,9 @@ namespace FilmStudioSFF.Controllers
         }
 
         // DELETE: api/film/{id}
+        //DONE WORKS
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "admin")]
         public ActionResult DeleteFilm(int id)
         {
             var film = _filmService.GetFilmById(id);
@@ -91,7 +95,7 @@ namespace FilmStudioSFF.Controllers
 
         // PATCH: api/film/{id}
         [HttpPatch("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "admin")]
         public IActionResult UpdateFilm(int id, [FromBody] Film updatedFilm)
         {
             if (updatedFilm == null || id != updatedFilm.FilmId)
@@ -110,11 +114,12 @@ namespace FilmStudioSFF.Controllers
         }
 
         // POST: api/filmstudio/{studioId}/rent
+        //DONE WORKS
         [Authorize(Roles = "filmstudio")]
         [HttpPost("rent")]
         public IActionResult RentFilmToStudio(int filmId, int studioId)
         {
-            var user = HttpContext.User; // Hämtar den autentiserade användaren
+            var user = HttpContext.User; 
             bool success = _filmStudioService.RentFilmToStudio(filmId, studioId);
 
             if (!success)

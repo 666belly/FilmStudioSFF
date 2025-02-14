@@ -18,6 +18,7 @@ namespace FilmStudioSFF.Data
         public DbSet<FilmCopy> FilmCopies { get; set; }
         public DbSet<Rental> Rentals { get; set; }
         public DbSet<Film> Films { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

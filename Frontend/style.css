@@ -65,3 +65,10 @@ nav ul li a {
 nav ul li a:hover {
     text-decoration: underline;
 }
+
+.filmList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Creates responsive columns */
+    gap: 20px; /* Space between grid items */
+    padding: 10px;
+}
