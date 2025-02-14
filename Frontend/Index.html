@@ -8,13 +8,21 @@
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to Film Studio Management</h1>
+        <h1>Welcome to your Film Studio Manager</h1>
         <nav>
-            <ul>
-                <li><a href="login.html">Login</a></li>
-                <li><a href="register.html">Register</a></li>
-            </ul>
+            <div>
+                <a href="login.html"><button>Login</button></a>
+                <a href="register.html"><button>Register</button></a>
+            </div>
         </nav>
+
+        <!-- Section to display all films -->
+        <section>
+            <h2>All Films</h2>
+            <div id="filmList" class="filmList"></div>
+        </section>
     </div>
+
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

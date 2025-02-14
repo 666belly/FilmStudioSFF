@@ -26,7 +26,6 @@ namespace FilmStudioSFF.Controllers
         //POST register new filmstudio
         //api/filmstudio/register
         // DONE - works
-
         [HttpPost("register")]
         public ActionResult<IRegisterFilmStudio> Register([FromBody] FilmStudio filmStudio)
         {
@@ -40,7 +39,9 @@ namespace FilmStudioSFF.Controllers
             return Ok(registeredFilmStudio);
         }
 
-
+        //POST login filmstudio
+        //api/filmstudio/login
+        // DONE - works
         [HttpPost("login")]
         public ActionResult<FilmStudioLoginResponse> LoginFilmStudio([FromBody] FilmStudioLogin loginModel)
         {
@@ -62,6 +63,7 @@ namespace FilmStudioSFF.Controllers
         //api/filmstudio/id
         // DONE - works
         [HttpGet("{id}")]   
+        [Authorize(Roles = "admin")]
         public IActionResult GetFilmStudioById(int id)
         {
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
@@ -91,9 +93,8 @@ namespace FilmStudioSFF.Controllers
 
         // GET rented film copies for a specific film studio
         // api/filmstudio/{studioId}/rented-films
-        // 200 ok but doesnt fetch list corretly??? 
         [HttpGet("{studioId}/rented-films")]
-        //[Authorize(Roles = "filmstudio")]
+        [Authorize(Roles = "filmstudio")]
         public IActionResult GetRentedFilms(int studioId)
         {
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
