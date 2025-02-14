@@ -89,6 +89,7 @@ export function loginFilmStudio(apiBaseUrl) {
                 localStorage.setItem('jwtToken', data.token);
                 localStorage.setItem('role', data.role);
                 localStorage.setItem('studioId', data.studioId); // Store the studioId
+                console.log(`Logged in as film studio with studioId: ${data.studioId}`);
 
                 if (data.role === 'filmstudio') {
                     window.location.href = 'filmstudio.html';
@@ -104,6 +105,11 @@ export function loginFilmStudio(apiBaseUrl) {
 export function fetchRentedFilms(apiBaseUrl) {
     const rentedFilmsList = document.getElementById('rentedFilmsList');
     const studioId = localStorage.getItem('studioId');
+    if (!studioId) {
+        console.error('studioId is undefined');
+        return;
+    }
+    console.log(`Fetching rented films for studioId: ${studioId}`);
 
     fetch(`${apiBaseUrl}/filmstudio/${studioId}/rented-films`, {
         headers: {
@@ -192,6 +198,7 @@ export function rentFilm(filmId) {
     const rentFilmMessage = document.getElementById('rentFilmMessage');
 
     if (!filmId || !studioId) {
+        console.error(`Invalid film or studio ID: filmId=${filmId}, studioId=${studioId}`);
         rentFilmMessage.textContent = 'Invalid film or studio ID.';
         return;
     }

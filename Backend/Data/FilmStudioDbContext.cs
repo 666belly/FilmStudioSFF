@@ -1,10 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using FilmStudioSFF.Models;
-using FilmStudioSFF.Data;
-using FilmStudioSFF.Controllers;
-using FilmStudioSFF.Services;
-using FilmStudioSFF.Interfaces;
-
 
 namespace FilmStudioSFF.Data
 {
@@ -19,7 +14,6 @@ namespace FilmStudioSFF.Data
         public DbSet<Rental> Rentals { get; set; }
         public DbSet<Film> Films { get; set; }
         
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

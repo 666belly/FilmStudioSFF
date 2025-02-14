@@ -8,12 +8,13 @@ public static class DataSeeder
 {
     public static void Seed(FilmStudioDbContext context)
     {
-        // Ensure the database is created
+        
         context.Database.EnsureCreated();
 
-        // Add Films
+        // Add list of mockfilms
         if (!context.Films.Any())
         {
+            //ChatGPT generated films and informations
             var film1 = new Film
             {
                 FilmId = 1,
@@ -112,35 +113,27 @@ public static class DataSeeder
 
             var filmCopies = new List<FilmCopy>
             {
-                // Copies for film1 (Midsommar)
                 new FilmCopy { FilmCopyId = 1, IsRented = false, Title = "Copy 1", Film = film1, FilmStudio = null },
                 new FilmCopy { FilmCopyId = 2, IsRented = false, Title = "Copy 2", Film = film1, FilmStudio = null },
 
-                // Copies for film2 (Get Out)
                 new FilmCopy { FilmCopyId = 3, IsRented = false, Title = "Copy 1", Film = film2, FilmStudio = null },
                 new FilmCopy { FilmCopyId = 4, IsRented = false, Title = "Copy 2", Film = film2, FilmStudio = null },
 
-                // Copies for film3 (The Lighthouse)
                 new FilmCopy { FilmCopyId = 5, IsRented = false, Title = "Copy 1", Film = film3, FilmStudio = null },
                 new FilmCopy { FilmCopyId = 6, IsRented = false, Title = "Copy 2", Film = film3, FilmStudio = null },
 
-                // Copies for film4 (Hereditary)
                 new FilmCopy { FilmCopyId = 7, IsRented = false, Title = "Copy 1", Film = film4, FilmStudio = null },
                 new FilmCopy { FilmCopyId = 8, IsRented = false, Title = "Copy 2", Film = film4, FilmStudio = null },
 
-                // Copies for film5 (The Witch)
                 new FilmCopy { FilmCopyId = 9, IsRented = false, Title = "Copy 1", Film = film5, FilmStudio = null },
                 new FilmCopy { FilmCopyId = 10, IsRented = false, Title = "Copy 2", Film = film5, FilmStudio = null },
 
-                // Copies for film6 (Parasite)
                 new FilmCopy { FilmCopyId = 11, IsRented = false, Title = "Copy 1", Film = film6, FilmStudio = null },
                 new FilmCopy { FilmCopyId = 12, IsRented = false, Title = "Copy 2", Film = film6, FilmStudio = null },
 
-                // Copies for film7 (The Babadook)
                 new FilmCopy { FilmCopyId = 13, IsRented = false, Title = "Copy 1", Film = film7, FilmStudio = null },
                 new FilmCopy { FilmCopyId = 14, IsRented = false, Title = "Copy 2", Film = film7, FilmStudio = null },
 
-                // Copies for film8 (A Quiet Place)
                 new FilmCopy { FilmCopyId = 15, IsRented = false, Title = "Copy 1", Film = film8, FilmStudio = null },
                 new FilmCopy { FilmCopyId = 16, IsRented = false, Title = "Copy 2", Film = film8, FilmStudio = null }
             };

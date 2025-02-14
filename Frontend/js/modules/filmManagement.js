@@ -1,3 +1,4 @@
+// leave it alone, does not work
 export async function deleteFilm(apiBaseUrl, filmCopyId) {
     if (!filmCopyId) {
         console.error('Error: filmCopyId is undefined');
@@ -21,7 +22,7 @@ export async function deleteFilm(apiBaseUrl, filmCopyId) {
             }
 
             alert('Film deleted successfully');
-            fetchAllFilms(apiBaseUrl); // Refresh film list
+            fetchAllFilms(apiBaseUrl); 
         } catch (error) {
             console.error('Error:', error);
             alert(`Error deleting film: ${error.message}`);
@@ -176,7 +177,7 @@ export function fetchAllFilms(apiBaseUrl) {
             document.querySelectorAll('.delete-film-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const filmCopyId = event.target.getAttribute('data-film-id');
-                    console.log(`Deleting film with ID: ${filmCopyId}`); // Debugging
+                    console.log(`Deleting film with ID: ${filmCopyId}`);
                     deleteFilm(apiBaseUrl, filmCopyId);
                 });
             });
@@ -187,7 +188,6 @@ export function fetchAllFilms(apiBaseUrl) {
         filmList.innerHTML = `<p>Error fetching films: ${error.message}</p>`;
     });
 }
-
 export async function editFilm(filmCopyId) {
     const editForm = document.getElementById(`editFilmForm-${filmCopyId}`);
     editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
