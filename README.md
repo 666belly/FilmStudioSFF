@@ -63,7 +63,6 @@ The project uses an in-memory database, so no additional setup is required for t
 Start the application using the following command:
 
    ```bash
-    Copy
     dotnet run
 
 4. *Access the Application*:
