@@ -103,7 +103,6 @@ export function loginFilmStudio(apiBaseUrl) {
     }
 }
 
-
 export function fetchRentedFilms(apiBaseUrl, filmStudioId) {
     const rentedFilmsList = document.getElementById('rentedFilmsList');
 
@@ -138,14 +137,55 @@ export function fetchRentedFilms(apiBaseUrl, filmStudioId) {
                     <p><strong>Director:</strong> ${film.director}</p>
                     <p><strong>Year:</strong> ${film.year}</p>
                     <p><strong>Genre:</strong> ${film.genre}</p>
+                    <button class="return-film-btn" data-film-copy-id="${film.filmCopyId}">Return</button>
                 `;
                 rentedFilmsList.appendChild(filmElement);
+            });
+
+            document.querySelectorAll('.return-film-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const filmCopyId = event.target.getAttribute('data-film-copy-id');
+                    returnFilm(apiBaseUrl, filmStudioId, filmCopyId);
+                });
             });
         }
     })
     .catch(error => {
         console.error('Error:', error);
         rentedFilmsList.innerHTML = `<p>Error fetching rented films: ${error.message}</p>`;
+    });
+}
+
+export function returnFilm(apiBaseUrl, filmStudioId, filmCopyId) {
+    const returnFilmMessage = document.getElementById('returnFilmMessage');
+
+    if (!filmStudioId || !filmCopyId) {
+        console.error('Missing filmStudioId or filmCopyId');
+        returnFilmMessage.textContent = 'Error: Missing filmStudioId or filmCopyId';
+        return;
+    }
+
+    fetch(`${apiBaseUrl}/filmstudio/return`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
+        },
+        body: JSON.stringify({ filmCopyId: parseInt(filmCopyId) })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text || response.statusText); });
+        }
+        return response.json();
+    })
+    .then(data => {
+        returnFilmMessage.textContent = 'Film returned successfully!';
+        fetchRentedFilms(apiBaseUrl, filmStudioId);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        returnFilmMessage.textContent = `Error returning film: ${error.message}`;
     });
 }
 
@@ -171,57 +211,14 @@ export function rentFilmToStudio(apiBaseUrl, filmStudioId, filmId) {
         if (!response.ok) {
             return response.text().then(text => { throw new Error(text || response.statusText); });
         }
-        return response.json();
+        return response.text().then(text => text ? JSON.parse(text) : {});
     })
     .then(data => {
         rentFilmMessage.textContent = 'Film rented successfully!';
-        fetchRentedFilms(apiBaseUrl, filmStudioId);
-    })
-}
-
-export function fetchAllFilms(apiBaseUrl) {
-    const filmList = document.getElementById('filmList');
-    const headers = {};
-    const filmStudioId = localStorage.getItem('filmStudioId'); 
-    const token = localStorage.getItem('jwtToken');
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    fetch(`${apiBaseUrl}/film`, { headers })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to fetch films');
-        }
-        return response.json();
-    })
-    .then(films => {
-        const filmsArray = films.$values || films;
-        if (!Array.isArray(filmsArray)) {
-            throw new Error('Films response is not an array');
-        }
-
-        filmList.innerHTML = '';
-        if (filmsArray.length === 0) {
-            filmList.innerHTML = '<p>No films available.</p>';
-        } else {
-            filmsArray.forEach(film => {
-                const filmElement = document.createElement('div');
-                filmElement.classList.add('film');
-                filmElement.innerHTML = `
-                    <h3>${film.title}</h3>
-                    <p>${film.description}</p>
-                    <p><strong>Director:</strong> ${film.director}</p>
-                    <p><strong>Year:</strong> ${film.year}</p>
-                    <p><strong>Genre:</strong> ${film.genre}</p>
-                    <p><strong>Available Copies:</strong> ${film.availableCopies}</p>
-                `;
-                filmList.appendChild(filmElement);
-            });
-        }
+        fetchRentedFilms(apiBaseUrl, filmStudioId); 
     })
     .catch(error => {
         console.error('Error:', error);
-        filmList.innerHTML = `<p>Error fetching films: ${error.message}</p>`;
+        rentFilmMessage.textContent = `Error renting film: ${error.message}`;
     });
 }

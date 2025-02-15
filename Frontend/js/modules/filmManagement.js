@@ -1,14 +1,15 @@
-// leave it alone, does not work
-export async function deleteFilm(apiBaseUrl, filmCopyId) {
-    if (!filmCopyId) {
-        console.error('Error: filmCopyId is undefined');
-        alert('Error: filmCopyId is undefined');
+import { rentFilmToStudio } from './filmStudioManagement.js';
+
+export async function deleteFilm(apiBaseUrl, filmId) {
+    if (!filmId) {
+        console.error('Error: filmId is undefined');
+        alert('Error: filmId is undefined');
         return;
     }
 
     if (confirm('Are you sure you want to delete this film?')) {
         try {
-            const response = await fetch(`${apiBaseUrl}/film/${filmCopyId}`, {
+            const response = await fetch(`${apiBaseUrl}/film/${filmId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`
@@ -22,7 +23,7 @@ export async function deleteFilm(apiBaseUrl, filmCopyId) {
             }
 
             alert('Film deleted successfully');
-            fetchAllFilms(apiBaseUrl); 
+            fetchAllFilms(apiBaseUrl);
         } catch (error) {
             console.error('Error:', error);
             alert(`Error deleting film: ${error.message}`);
@@ -80,6 +81,8 @@ export function addFilm(apiBaseUrl) {
 
 export function fetchAllFilms(apiBaseUrl) {
     const filmList = document.getElementById('filmList');
+    const filmStudioId = localStorage.getItem('filmStudioId'); // Get the filmStudioId from localStorage
+    const isFilmStudioPage = window.location.pathname.includes('filmstudio.html');
     const isAdminPage = window.location.pathname.includes('admin.html');
 
     fetch(`${apiBaseUrl}/film`, {
@@ -113,44 +116,80 @@ export function fetchAllFilms(apiBaseUrl) {
                     <p><strong>Year:</strong> ${film.year}</p>
                     <p><strong>Genre:</strong> ${film.genre}</p>
                     <p><strong>Available Copies:</strong> ${film.availableCopies}</p>
-                    ${isAdminPage ? `
-                    <button class="delete-film-btn" data-film-id="${film.filmCopyId}">Delete</button>
-                    <button onclick="editFilm(${film.filmCopyId})">Edit</button>
-                    <form id="editFilmForm-${film.filmCopyId}" class="edit-film-form" style="display: none;">
-                        <label for="title-${film.filmCopyId}">Title:</label>
-                        <input type="text" id="title-${film.filmCopyId}" name="title" value="${film.title}" required>
-                        <label for="description-${film.filmCopyId}">Description:</label>
-                        <input type="text" id="description-${film.filmCopyId}" name="description" value="${film.description}" required>
-                        <label for="availableCopies-${film.filmCopyId}">Available Copies:</label>
-                        <input type="number" id="availableCopies-${film.filmCopyId}" name="availableCopies" value="${film.availableCopies}" required>
-                        <label for="genre-${film.filmCopyId}">Genre:</label>
-                        <input type="text" id="genre-${film.filmCopyId}" name="genre" value="${film.genre}" required>
-                        <label for="director-${film.filmCopyId}">Director:</label>
-                        <input type="text" id="director-${film.filmCopyId}" name="director" value="${film.director}" required>
-                        <label for="year-${film.filmCopyId}">Year:</label>
-                        <input type="number" id="year-${film.filmCopyId}" name="year" value="${film.year}" required>
-                        <label for="isAvailable-${film.filmCopyId}">Is Available:</label>
-                        <input type="checkbox" id="isAvailable-${film.filmCopyId}" name="isAvailable" ${film.isAvailable ? 'checked' : ''}>
-                        <button type="submit">Save</button>
-                    </form>` : ''}
                 `;
-                filmList.appendChild(filmElement);
+
+                if (isFilmStudioPage) {
+                    film.filmCopies.forEach(copy => {
+                        if (!copy.isRented) {
+                            const rentButton = document.createElement('button');
+                            rentButton.textContent = `Rent ${copy.title}`;
+                            rentButton.classList.add('rent-film-btn');
+                            rentButton.setAttribute('data-film-id', copy.filmCopyId);
+                            rentButton.addEventListener('click', () => {
+                                rentFilmToStudio(apiBaseUrl, filmStudioId, copy.filmCopyId);
+                            });
+
+                            filmElement.appendChild(rentButton);
+                        }
+                    });
+                }
 
                 if (isAdminPage) {
-                    document.getElementById(`editFilmForm-${film.filmCopyId}`).addEventListener('submit', async (event) => {
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.classList.add('delete-film-btn');
+                    deleteButton.setAttribute('data-film-id', film.filmId);
+                    deleteButton.addEventListener('click', (event) => {
+                        const filmId = event.currentTarget.getAttribute('data-film-id');
+                        deleteFilm(apiBaseUrl, filmId);
+                    });
+
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Edit';
+                    editButton.addEventListener('click', () => {
+                        editFilm(film.filmId);
+                    });
+
+                    filmElement.appendChild(deleteButton);
+                    filmElement.appendChild(editButton);
+
+                    const editForm = document.createElement('form');
+                    editForm.id = `editFilmForm-${film.filmId}`;
+                    editForm.classList.add('edit-film-form');
+                    editForm.style.display = 'none';
+                    editForm.innerHTML = `
+                        <label for="title-${film.filmId}">Title:</label>
+                        <input type="text" id="title-${film.filmId}" name="title" value="${film.title}" required>
+                        <label for="description-${film.filmId}">Description:</label>
+                        <input type="text" id="description-${film.filmId}" name="description" value="${film.description}" required>
+                        <label for="availableCopies-${film.filmId}">Available Copies:</label>
+                        <input type="number" id="availableCopies-${film.filmId}" name="availableCopies" value="${film.availableCopies}" required>
+                        <label for="genre-${film.filmId}">Genre:</label>
+                        <input type="text" id="genre-${film.filmId}" name="genre" value="${film.genre}" required>
+                        <label for="director-${film.filmId}">Director:</label>
+                        <input type="text" id="director-${film.filmId}" name="director" value="${film.director}" required>
+                        <label for="year-${film.filmId}">Year:</label>
+                        <input type="number" id="year-${film.filmId}" name="year" value="${film.year}" required>
+                        <label for="isAvailable-${film.filmId}">Is Available:</label>
+                        <input type="checkbox" id="isAvailable-${film.filmId}" name="isAvailable" ${film.isAvailable ? 'checked' : ''}>
+                        <button type="submit">Save</button>
+                    `;
+
+                    editForm.addEventListener('submit', async (event) => {
                         event.preventDefault();
                         const updatedFilmData = {
-                            title: document.getElementById(`title-${film.filmCopyId}`).value,
-                            description: document.getElementById(`description-${film.filmCopyId}`).value,
-                            availableCopies: parseInt(document.getElementById(`availableCopies-${film.filmCopyId}`).value),
-                            genre: document.getElementById(`genre-${film.filmCopyId}`).value,
-                            director: document.getElementById(`director-${film.filmCopyId}`).value,
-                            year: parseInt(document.getElementById(`year-${film.filmCopyId}`).value),
-                            isAvailable: document.getElementById(`isAvailable-${film.filmCopyId}`).checked
+                            filmId: film.filmId,
+                            title: document.getElementById(`title-${film.filmId}`).value,
+                            description: document.getElementById(`description-${film.filmId}`).value,
+                            availableCopies: parseInt(document.getElementById(`availableCopies-${film.filmId}`).value),
+                            genre: document.getElementById(`genre-${film.filmId}`).value,
+                            director: document.getElementById(`director-${film.filmId}`).value,
+                            year: parseInt(document.getElementById(`year-${film.filmId}`).value),
+                            isAvailable: document.getElementById(`isAvailable-${film.filmId}`).checked
                         };
 
                         try {
-                            const response = await fetch(`${apiBaseUrl}/film/${film.filmCopyId}`, {
+                            const response = await fetch(`${apiBaseUrl}/film/${film.filmId}`, {
                                 method: 'PATCH',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -170,15 +209,11 @@ export function fetchAllFilms(apiBaseUrl) {
                             alert(`Error updating film: ${error.message}`);
                         }
                     });
-                }
-            });
 
-            document.querySelectorAll('.delete-film-btn').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    const filmCopyId = event.target.getAttribute('data-film-id');
-                    console.log(`Deleting film with ID: ${filmCopyId}`);
-                    deleteFilm(apiBaseUrl, filmCopyId);
-                });
+                    filmElement.appendChild(editForm);
+                }
+
+                filmList.appendChild(filmElement);
             });
         }
     })
@@ -187,9 +222,14 @@ export function fetchAllFilms(apiBaseUrl) {
         filmList.innerHTML = `<p>Error fetching films: ${error.message}</p>`;
     });
 }
-export async function editFilm(filmCopyId) {
-    const editForm = document.getElementById(`editFilmForm-${filmCopyId}`);
-    editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+
+export async function editFilm(filmId) {
+    const editForm = document.getElementById(`editFilmForm-${filmId}`);
+    if (editForm) {
+        editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+    } else {
+        console.error(`Edit form for filmId ${filmId} not found`);
+    }
 }
 
 export function fetchAllFilmStudios(apiBaseUrl) {
