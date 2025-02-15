@@ -47,6 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 rentFilmToStudio(apiBaseUrl, filmStudioId, filmId); 
             });
         }
+
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', logout);
+        }
     }
 
 

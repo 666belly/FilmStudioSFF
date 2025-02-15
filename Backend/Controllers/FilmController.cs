@@ -126,7 +126,7 @@ namespace FilmStudioSFF.Controllers
                 return StatusCode(409, "Kunde inte hyra filmen.");
             }
 
-            return Ok("Film uthyrd framgångsrikt.");
+            return Ok();
         }
 
         // POST: api/filmstudio/return
