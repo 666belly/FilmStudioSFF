@@ -134,13 +134,13 @@ namespace FilmStudioSFF.Controllers
         [Authorize(Roles = "filmstudio")]
         public IActionResult ReturnFilm([FromBody] ReturnRequest returnRequest)
         {
-            if (returnRequest == null || returnRequest.FilmCopyId <= 0)
+            if (returnRequest == null || returnRequest.FilmCopyId <= 0 || returnRequest.FilmStudioId <= 0)
             {
                 return BadRequest("Ogiltig begäran.");
             }
 
             var studioId = GetAuthenticatedStudioId(User);
-            if (studioId == null)
+            if (studioId == null || studioId != returnRequest.FilmStudioId)
             {
                 return Unauthorized("Du måste vara inloggad som filmstudio.");
             }

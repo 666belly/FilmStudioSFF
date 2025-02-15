@@ -216,7 +216,6 @@ namespace FilmStudioSFF.Services
             }
             else
             {
-                // For non-admin, return a reduced version without City and RentedFilms
                 return studios.Select(studio => new FilmStudioDTO
                 {
                     FilmStudioId = studio.FilmStudioId,
@@ -225,7 +224,6 @@ namespace FilmStudioSFF.Services
                     Role = studio.Role,
                     Email = studio.Email,
                     City = studio.City
-                    // RentedFilms are excluded for non-admin users
                 }).ToList();
             }
         }
@@ -263,29 +261,29 @@ namespace FilmStudioSFF.Services
 
 
 
-            public bool ReturnRequest(int studioId, int filmCopyId)
+        public bool ReturnRequest(int studioId, int filmCopyId)
+        {
+            var studio = _context.FilmStudios
+                .Include(fs => fs.RentedFilms)
+                .FirstOrDefault(fs => fs.FilmStudioId == studioId);
+
+            if (studio == null)
             {
-                var studio = _context.FilmStudios
-                    .Include(fs => fs.RentedFilms)
-                    .FirstOrDefault(fs => fs.FilmStudioId == studioId);
-
-                if (studio == null)
-                {
-                    Console.WriteLine($"Filmstudio med ID {studioId} hittades inte.");
-                    return false;
-                }
-
-                var filmCopy = studio.RentedFilms.FirstOrDefault(fc => fc.FilmCopyId == filmCopyId);
-                if (filmCopy == null)
-                {
-                    Console.WriteLine($"Film med ID {filmCopyId} hittades inte i hyrda filmer.");
-                    return false;
-                }
-
-                studio.RentedFilms.Remove(filmCopy);
-                _context.SaveChanges();
-                return true;
+                Console.WriteLine($"Filmstudio med ID {studioId} hittades inte.");
+                return false;
             }
+
+            var filmCopy = studio.RentedFilms.FirstOrDefault(fc => fc.FilmCopyId == filmCopyId);
+            if (filmCopy == null)
+            {
+                Console.WriteLine($"Film med ID {filmCopyId} hittades inte i hyrda filmer.");
+                return false;
+            }
+
+            studio.RentedFilms.Remove(filmCopy);
+            _context.SaveChanges();
+            return true;
+        }
 
 
             public IEnumerable<FilmCopy> GetRentalsForStudio(int studioId)
